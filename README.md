@@ -49,7 +49,7 @@ lidar/
 
 # Installation
 
-This software has been developed for Linux and testet with Ubuntu Mate 20.04.
+This software has been developed for Linux and testet with Ubuntu Mate 20.04 on Desktop, RaspiOS Bullseye on Raspberry Pi 3 and 4, and Debian Buster for RockPi S.
 
 ## Set up Single Computer Configuration
 
