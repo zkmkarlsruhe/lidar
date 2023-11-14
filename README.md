@@ -22,8 +22,6 @@ The ***lidaradmin*** allows to manage a large number distributed lidar nodes.
 
 Each configuration of LiDAR sensors in a space is called a **lidar configuration**. A lidar configuration is stored in a directory named **lidarconfig-*name*** which lives in the same directory as lidartool and lidaradmin.
 
-The software has been developed for Linux and testet with Ubuntu Mate 20.04.
-
 This repository is structured the following way:
 
 ```
@@ -50,6 +48,8 @@ lidar/
 - **lidarconfig-...**: are created for each configuration (... is the configuration name) and contain configuration specific scripts and data
 
 # Installation
+
+This software has been developed for Linux and testet with Ubuntu Mate 20.04.
 
 ## Set up Single Computer Configuration
 
