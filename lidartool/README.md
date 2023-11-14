@@ -74,13 +74,7 @@ If you want to install on a **Radxa RockPi S**, follow these [instructions](doc/
 
 ## 1. Clone Repository
 
-clone this repository
-
-```
-git clone https://github.com/zkmkarlsruhe/lidar.git
-```
-
-cd to path of cloned repository:
+cd to path `lidar/lidartool` of repository:
 
 ```console
 cd lidar/lidartool
