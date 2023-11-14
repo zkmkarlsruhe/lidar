@@ -77,7 +77,7 @@ If you want to install on a **Radxa RockPi S**, follow these [instructions](doc/
 clone this repository
 
 ```
-git clone git.......
+git clone https://github.com/zkmkarlsruhe/lidar.git
 ```
 
 cd to path of cloned repository:
