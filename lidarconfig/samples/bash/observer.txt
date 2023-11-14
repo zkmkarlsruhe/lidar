@@ -1,0 +1,7 @@
+
+# filter contains switch:  script is executed when the occupation of the region changes (somebody in or not)
+# filter contains count:   script is executed when the people count in the region changes
+
+observer+=(+observer @type=bash :switch,region @name=my_switch @script=[conf]/MyScript.sh @regions='myRegion')
+observer+=(+observer @type=bash :count,region  @name=my_count  @script=[conf]/MyScript.sh @regions='myRegion' @scriptParameter='type=count param1=my param2=own param3=parameter')
+

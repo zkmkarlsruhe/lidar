@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=$confDir/StartServer.sh
+Hidden=false
+X-MATE-Autostart-enabled=false
+Name[en_US]=Lidar Server
+Name=Lidar Server
+Comment[en_US]=Start LiDAR Server
+Comment=Start LiDAR Server
+X-MATE-Autostart-Delay=0

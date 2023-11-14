@@ -1,0 +1,103 @@
+diff --git a/sdk/include/rplidar_driver.h b/sdk/include/rplidar_driver.h
+index bd2fc82..aba3e2b 100644
+--- a/sdk/include/rplidar_driver.h
++++ b/sdk/include/rplidar_driver.h
+@@ -234,7 +234,7 @@ public:
+ protected:
+     RPlidarDriver();
+ 
+-private:
++public:
+     sl_u32 _channelType;
+     IChannel* _channel;
+     ILidarDriver* _lidarDrv;
+diff --git a/sdk/src/rplidar_driver.cpp b/sdk/src/rplidar_driver.cpp
+index ed34db1..a879f90 100644
+--- a/sdk/src/rplidar_driver.cpp
++++ b/sdk/src/rplidar_driver.cpp
+@@ -189,11 +189,25 @@ namespace rp { namespace standalone{ namespace rplidar {
+ 
+     u_result RPlidarDriver::startMotor()
+     {
+-        return (_lidarDrv)->setMotorSpeed(600);
++      u_result result = (_lidarDrv)->setMotorSpeed(600);
++
++      if ( _channelType == CHANNEL_TYPE_SERIALPORT ) // add motor control via DTR
++      { ISerialPortChannel *serialChannel = static_cast<ISerialPortChannel*>(_channel);
++	serialChannel->setDTR( false );
++      }
++
++      return result;
+     }
+     u_result RPlidarDriver::stopMotor()
+     {
+-        return (_lidarDrv)->setMotorSpeed(0);
++      u_result result = (_lidarDrv)->setMotorSpeed(0);
++
++      if ( _channelType == CHANNEL_TYPE_SERIALPORT ) // add motor control via DTR
++      {
++	ISerialPortChannel *serialChannel = static_cast<ISerialPortChannel*>(_channel);
++	serialChannel->setDTR( true );
++      }
++      return result;
+     }
+ 
+ }}}
+diff --git a/sdk/src/sl_lidar_driver.cpp b/sdk/src/sl_lidar_driver.cpp
+index e377dcf..2f7b0f9 100644
+--- a/sdk/src/sl_lidar_driver.cpp
++++ b/sdk/src/sl_lidar_driver.cpp
+@@ -175,7 +175,7 @@ namespace sl {
+         if (i == count) return SL_RESULT_OPERATION_FAIL;
+ 
+         //Tune tail
+-        for (i = count - 1; i < count; i--) {
++        for (i = count - 1; i >= 0; i--) { // Fixed wrong checking i 
+             // To avoid array overruns, use the i < count condition
+             if (getDistanceQ2(nodebuffer[i]) == 0) {
+                 continue;
+@@ -246,7 +246,7 @@ namespace sl {
+             
+             {
+                 rp::hal::AutoLocker l(_lock);
+-                ans = _channel->open();
++                bool ans = _channel->open();
+                 if (!ans)
+                     return SL_RESULT_OPERATION_FAIL;
+ 
+@@ -562,7 +562,7 @@ namespace sl {
+         {
+             switch (_dataEvt.wait(timeout))
+             {
+-            case rp::hal::Event::EVENT_TIMEOUT:
++            case (long unsigned int)rp::hal::Event::EVENT_TIMEOUT:
+                 count = 0;
+                 return SL_RESULT_OPERATION_TIMEOUT;
+             case rp::hal::Event::EVENT_OK:
+@@ -594,7 +594,7 @@ namespace sl {
+                 rp::hal::AutoLocker l(_lock);
+                 ans = _sendCommand(SL_LIDAR_CMD_GET_DEVICE_INFO);
+                 if (!ans) return ans;
+-                return _waitResponse(info, SL_LIDAR_ANS_TYPE_DEVINFO);
++                return _waitResponse(info, SL_LIDAR_ANS_TYPE_DEVINFO, timeout); // forwarding timeout
+             }           
+         }
+ 
+@@ -2240,4 +2240,4 @@ namespace sl {
+     {
+         return new SlamtecLidarDriver();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/sdk/src/sl_serial_channel.cpp b/sdk/src/sl_serial_channel.cpp
+index e2c678d..3abfb50 100644
+--- a/sdk/src/sl_serial_channel.cpp
++++ b/sdk/src/sl_serial_channel.cpp
+@@ -121,4 +121,4 @@ namespace sl {
+         return new  SerialPortChannel(device, baudrate);
+     }
+ 
+-}
+\ No newline at end of file
++}

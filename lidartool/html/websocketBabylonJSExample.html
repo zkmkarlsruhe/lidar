@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2022 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Babylon Template</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: calc(100%);
+                margin: 0;
+                padding: 0;
+            }
+            
+            #header {
+                position: absolute;
+                position: fixed;
+                top: 4px;
+                left: 10px;
+                width: 100%;
+                height:44px;
+            }
+            #renderCanvas {
+                position:relative;
+                width: 100%;
+                height: calc(89%);
+                top: 29px;
+                bottom: 32px;
+                touch-action: none;
+            }
+            #footer {
+                position: absolute;
+                position: fixed;
+                bottom: 0px;
+                left:0;
+                width: 100%;
+            }
+        </style>
+
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://cdn.babylonjs.com//materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    </head>
+
+   <body>
+        <div id="header">
+            URL: ws://<input type="text" name="url" id="url" value="localhost:5000" />
+            <button onclick="connect();" id="connect">Connect</button>
+        </div>
+        <canvas id="renderCanvas" touch-action="none"></canvas> <!-- touch-action="none" for best results from PEP -->
+        <div id="footer">
+        <div><u>Server response</u></div>
+        <div id="output"></div>
+       </div>
+
+    <script>
+      var ws, url;
+      var connecting;
+    
+      var connect = function( evt ){
+
+        if ( ws != null )
+        {   ws.close();
+            ws = null;
+            document.getElementById("connect").innerText = "Connect";
+            return;
+        }
+
+        url = "ws://"+document.getElementById("url").value;
+
+        initWS( url );
+      };
+
+      function initWS( url ) {
+
+      ws = new WebSocket( url );
+      
+      connecting = true;
+      
+      ws.onmessage = function( evt ){
+          const json = JSON.parse( evt.data );
+          updateScene( json.objects );
+      };
+      ws.onerror = function( evt ) {
+          addMessage( '<i>WebSocket error :(</i>' );
+      };
+      ws.onopen = function( evt ) {
+          addMessage( '<i>Connected to</i> '+url );
+          document.getElementById("connect").innerText = "Disconnect";
+          connecting = false;
+          sendMessage( "filter:frame,frame_id,objects,move,x,y,z,size,id" );
+      };
+      ws.onclose = function( evt ) {
+          if ( !connecting )
+            addMessage( '<i>Disconnected</i>' );
+          connecting = false;
+          document.getElementById("connect").innerText = "Connect";
+          ws = null;
+      };
+    }
+    function sendMessage( msg ){
+      ws.send(msg);
+    }
+    function addMessage( msg ){
+      output.innerHTML = msg;
+    }
+
+    const canvas = document.getElementById("renderCanvas");
+    const engine = new BABYLON.Engine(canvas, true);
+
+    const scale = 10.0;
+    var origin;
+    var adt;
+    var texts = [];
+    var trackMaterial;
+        
+    const createScene = function () {
+     
+      const scene = new BABYLON.Scene(engine);
+
+      scene.clearColor = BABYLON.Color3.Black();
+
+      const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 15, new BABYLON.Vector3(0, 0, 0));
+      camera.attachControl(canvas, true);
+      camera.inertia = 0;
+      camera.wheelPrecision = 3;
+      const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
+      
+      var groundMaterial = new BABYLON.GridMaterial("groundMaterial", scene);
+      groundMaterial.majorUnitFrequency = 5;
+      groundMaterial.minorUnitVisibility = 0.75;
+      groundMaterial.gridRatio = 1;
+      groundMaterial.opacity = 0.99;
+      groundMaterial.useMaxLine = true;
+
+      trackMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
+
+      trackMaterial.diffuseColor  = new BABYLON.Color3(0, 0.4, 0);
+      trackMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+      trackMaterial.emissiveColor = new BABYLON.Color3(0, 0.3, 0);
+      trackMaterial.ambientColor = new BABYLON.Color3(0, 0, 0);
+
+      var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 100, height: 100}, scene, false);
+      ground.material = groundMaterial;
+
+      origin = BABYLON.Mesh.CreateSphere("origin", 15, 1, scene);
+      origin.material  = trackMaterial;
+      origin.isVisible = false;
+
+      adt = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+      return scene;
+    };
+        
+        
+    const addText = function ( i, name ) {
+      var text = new BABYLON.GUI.TextBlock();
+      text.color = "white";
+      text.fontSize = 12;
+      text.fontFamily = "Helvetica";
+      
+      adt.addControl(text);
+      text.linkWithMesh( origin.instances[i] );
+      
+      texts[i] = text;
+    }
+      
+    const updateScene = function ( objects ) {
+      for(var i = 0; i < objects.length; i++) {
+        var obj = objects[i];
+        var instance;
+        if ( i >= origin.instances.length )
+        { instance = origin.createInstance("i" + i);
+          addText( i, instance.name )
+        }
+        else
+          instance = origin.instances[i];
+      
+        instance.position.x = obj.x * scale;
+        instance.position.z = obj.y * scale;
+      //               instance.position.y = obj.z * scale;
+        instance.scaling.x = obj.size * scale;
+        instance.scaling.y = obj.size * scale;
+        instance.scaling.z = obj.size * scale;
+        instance.isVisible = true;
+        texts[i].isVisible = true;
+        texts[i].text = "id:"+obj.id;
+      }
+
+      for ( var i = objects.length; i < origin.instances.length; i++ )
+      { origin.instances[i].isVisible = false;
+        texts[i].isVisible            = false;
+      }
+    };
+
+    var scene = createScene(); //Call the createScene function
+
+    engine.runRenderLoop(function () {
+      scene.render();
+    });
+
+    window.addEventListener("resize", function () {
+      engine.resize();
+    });
+    </script>
+
+   </body>
+
+</html>

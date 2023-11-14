@@ -1,0 +1,1 @@
+../lidaradmin/manageNodes.sh

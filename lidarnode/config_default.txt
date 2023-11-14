@@ -1,0 +1,15 @@
+conf=default
+
+lidarroot=$(realpath `dirname $0`/..)
+
+server=localhost
+webPort=8080
+adminPort=8000
+
+portBase=40
+
+useServerGit=false
+
+nodeDB="nodeDB.txt"
+sensorDB="sensorDB.txt"
+

@@ -1,0 +1,3 @@
+
+observer+=(+observer @type=websocket :frame,frame_id,objects,type,enter,move,leave,regions,region,x,y,z,size,id,lifespan,count @name=my_websocket @port=5000 @regions='myRegion')
+

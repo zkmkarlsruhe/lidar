@@ -1,0 +1,985 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2023 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html lang="en">
+<head>
+  <title>Lidar Admin</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<style>
+
+html, body {
+    width: calc(100%);
+    height: calc(100%);
+    margin: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+pre {
+  background-color: #ffffff;
+  border:0px 
+}
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bigDot {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  display: inline-block;
+  position:relative;
+  top:12px;
+}
+
+.btn-startStop {
+  height: 34px;
+}
+
+.btn-startStopServer {
+  height: 30px;
+}
+
+.runningMode {
+  margin-top: 8;
+}
+
+.runningModeText {
+}
+
+.runningModeSetup {
+  color: #9f0000;
+}
+
+.runningModeSimulation {
+  color: #9f9f00;
+}
+
+.runningModeProduction {
+  color: #00009f;
+}
+
+.fs-warning {
+  color: #ffffff;
+  background-color: #ff0000;
+}
+
+.alertDay {
+  color: #000000;
+  background-color: #ffe0e0;
+}
+
+.okDay {
+  color: #000000;
+  background-color: #e0ffe0;
+}
+
+.deviceOk {
+  color: #00a000;
+}
+
+.deviceError {
+  color: #a00000;
+}
+
+.ok {
+  background-color: #00af00;
+}
+
+.warning {
+  background-color: #dfdf00;
+}
+
+.error {
+  background-color: #af0000;
+}
+
+.stopped {
+  background-color: #bbbbbb;
+}
+
+.btn-list { height: 3vh;
+      height: 18px;
+      padding:.15rem .75rem;
+      font-size:1rem;
+      border-radius:.1.5rem
+}
+
+.btn-sin { height: 3vh;
+      height: 18px;
+      padding:0rem 0rem;
+      font-size:1.2rem;
+      border-radius:0rem
+}
+
+.btn-list-menu-item {
+     font-size:1.1rem;
+      padding:0rem 0rem;
+}
+
+.textedit {
+    font-family: monospace;
+    font-size:1.4rem;
+}
+
+.action-item { font-size:0.95rem;
+}
+
+.t-nl {
+   padding-left:  5px;
+   padding-right:  5px;
+   padding-top:   1px;
+   padding-bottom:   1px;
+}
+
+.t-fs {
+   padding-left:  10px;
+   padding-right: 10px;
+   padding-top:   1px;
+   padding-bottom:   1px;
+   font-size: 13px; /* Set a font-size */
+}
+
+table {
+  border-spacing: 1px;
+}
+
+.buttonload {
+  background-color: #04AA6D; /* Green background */
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 12px 24px; /* Some padding */
+  font-size: 16px; /* Set a font-size */
+}
+
+/* Add a right margin to each icon */
+.fa {
+  margin-left: -2px;
+  margin-right: 8px;
+}
+
+</style>
+
+<body>
+
+<div class="container">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="">Home</a></li>
+    <li><a href="#sensors">Sensors</a></li>
+    <li><a href="#nodes">Maintain</a></li>
+    <li><a id="lidar-ui" href="#ui">UI</a></li>
+    <li class="hasHub"><a id="lidar-hub" class="hasHub" href="#hubui">HUB</a></li>
+  </ul>
+
+  <div class="tab-content">
+	<p><p>
+	<div id="home" class="tab-pane fade in active">
+
+	  <div class="btn-group mr-1">
+	    <button class="btn me-1" type="button" id="startStop">
+	      <i class="startStop fa fa-refresh fa-spin"></i>Wait
+	    </button>
+	    <button class="btn btn-startStop dropdown-toggle" style="margin-left: 0;" id="startStopMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	      <span class="caret"></span>
+	      <span class="sr-only">Toggle Dropdown</span>
+	    </button>
+	    <ul class="dropdown-menu">
+	      <li><a class="dropdown-item btn-restart" href="#">Restart Server</a></li>
+	    </ul> 
+	  </div>
+	  &nbsp;&nbsp;&nbsp;&nbsp;<span class="bigdot" id="deviceHealth"></span>
+	  <span  class="hasHub" > &nbsp;&nbsp;&nbsp;&nbsp;<span class="bigdot" id="hubRunning"></span> &nbsp &nbsp
+	  <div class="btn-group mr-1">
+	    <button class="btn btn-startStop dropdown-toggle" style="margin-left: 0;" id="startStopHUBMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	      <span class="caret"></span>
+	      <span class="sr-only">Toggle Dropdown</span>
+	    </button>
+	    <ul class="dropdown-menu">
+	      <li><a class="dropdown-item btn-restart-hub" href="#">Restart HUB</a></li>
+	      <li><a class="dropdown-item btn-stop-hub" href="#">Stop HUB</a></li>
+	    </ul> <button class="btn me-1" type="button" id="startStop-hub1">HUB</button>
+	  </div></span>
+	  <div class="runningMode">
+	    &nbsp;&nbsp;&nbsp;<span class="runningModeText" id="runningMode-text"></span><br>&nbsp;&nbsp;&nbsp;<span class="appStartDate" id="appStartDate-text"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="appStartDate" id="appStartDate-date"></span>
+	  </div>
+	   
+	  <div id="status">
+	  </div>
+          <br>
+	  <div id="filesystem" style="">
+	  </div>
+          <br>
+	  <div>
+	    <div id="lastErrors"></div>
+	  </div>
+	  <p><p>
+   </div>
+    <div id="sensors" class="tab-pane fade">
+	  <p><p>
+	  <div id="deviceList">
+	  </div>
+    </div>
+    <div id="nodes" class="tab-pane fade">
+	  <p><p>
+	  <div>
+	    <div class="btn-group me-1">
+	      <button class="btn me-1 btn-sm" type="button" id="startStopServer">
+		<i class="startStopServer fa fa-refresh fa-spin"></i>Wait
+	      </button>
+	      <button class="btn btn-startStopServer dropdown-toggle" style="margin-left: 0;" id="startStopServerMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span class="caret"></span>
+		<span class="sr-only">Toggle Dropdown</span>
+	      </button>
+	      <ul class="dropdown-menu">
+		<li><a class="dropdown-item me-1 btn-sm btn-restartNoSensors" href="#">Restart with Sensors Off</a></li>
+		<li><a class="dropdown-item me-1 btn-sm btn-restartServer" href="#">Restart Server</a></li>
+		<li><a class="dropdown-item me-1 btn-sm btn-stopServer" href="#">Stop Server</a></li>
+	      </ul> 
+	    </div>
+	    <span class="dropdown">
+	      <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton-mode" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span id="mode-text">Mode</span>
+		<span class="caret"></span>
+	      </button>
+	      <ul class="dropdown-menu action-item" aria-labelledby="dropdownMenuButton-mode">
+	        <li><a class="dropdown-item btn-runMode" href="#">Production</a></li>
+	        <li><a class="dropdown-item btn-runMode" href="#">Setup</a></li>
+	        <li><a class="dropdown-item btn-runMode" href="#"><span class="hasSimulation">Simulation</span></a></li>
+	      </ul>
+	    </span>
+	    <span class="dropdown hasHub">
+	      <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton-hub" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span id="hub-text">Hub</span>
+		<span class="caret"></span>
+	      </button>
+	      <ul class="dropdown-menu action-item" aria-labelledby="dropdownMenuButton-hub">
+	        <li><a class="dropdown-item btn-hubMode" href="#">Hub</a></li>
+	        <li><a class="dropdown-item btn-hubMode" href="#">NoHub</a></li>
+	      </ul>
+	    </span>
+
+	    <span class="hasSensors"><button class="btn btn-secondary btn-sm me-1 disabled" type="button" id="applySensorDB">
+		Apply SensorDB
+	    </button></span>
+	    <span class="hasNodes"><div class="btn-group me-1">
+	      <button class="btn btn-success btn-sm me-1 hasNodes" type="button" id="startAllNodes">
+		Run Nodes
+	      </button>
+	      <button class="btn btn-startStopServer dropdown-toggle" style="margin-left: 0;" id="startStopServerMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		<span class="caret"></span>
+		<span class="sr-only">Toggle Dropdown</span>
+	      </button>
+	      <ul class="dropdown-menu">
+		<li><a class="dropdown-item me-1 btn-sm" href="#" id="stopAllNodes">Stop Nodes</a></li>
+		<li><a class="dropdown-item me-1 btn-sm" href="#" id="rebootAllNodes">Reboot Nodes</a></li>
+	      </ul> 
+	    </div></span>
+	  </div>
+	  <p><hr/><p>
+	  <div  class="nodeListPane"><div  class="useNodes">
+	    <div id="nodeList" style="font-family: monospace;">
+	      Initializing...
+	    </div>
+	    <p><hr/><p>
+	  </div></div>
+	  <div class="editSensors">
+	    <button class="btn btn-primary btn-sm me-1" type="button" id="editSensors">
+	      Edit Sensors
+	    </button>
+	  </div>
+	  <div  class="editSensorsPane">
+	    <div class="useNodes">
+	      <table class="textedit"><tr><th class="t-nl">Group</th><th class="t-nl">Type</th><th class="t-nl">Num</th><th class="t-nl">NodeId</th><th class="t-nl">Active</th><th class="t-nl">MAC</th></tr></table>
+	    </div>
+	    <div class="form-outline" id="editSensorDB">
+	      <textarea class="form-control textedit" id="sensorDB" rows="10"></textarea>
+	    </div></p></p>
+	    <button class="btn btn-warning btn-sm me-1" type="button" id="cancelEditSensors">
+	      Cancel
+	    </button>
+	    <button class="btn btn-success btn-sm me-1" type="button" id="saveEditSensors">
+	      Save
+	    </button>
+	  </div>
+    </div>
+    <div class="tab-pane fade">
+        <h3>UI</h3>
+	</p></p>
+    </div>
+  </div>
+</div>
+
+<script>
+
+var nodesBuisy = false;
+var lastNodeList = "";
+var lastSensorDB = "";
+var runMode = ""
+var hubMode  = ""
+var rerun = false;
+
+function buisyButtonText( button )
+{
+      return $('#'+button).contents().filter(function() { return this.nodeType === 3 && this.nodeValue.trim().length; }).text();
+}
+
+function setBuisyButtonText( button, text )
+{
+      $('#'+button).contents().filter(function() { return this.nodeType === 3 && this.nodeValue.trim().length; }).replaceWith( text );
+}
+
+function setStartDate( date )
+{
+      if ( date != "" )
+      { $("#appStartDate-text").text( "Started:" );
+        $("#appStartDate-date").text( date );
+      }
+      else
+      {
+        $("#appStartDate-text").text( "" );
+        $("#appStartDate-date").text( "" );
+      }
+}
+
+function setRunningMode( mode )
+{
+      $("#runningMode-text").removeClass( "runningModeProduction" );
+      $("#runningMode-text").removeClass( "runningModeSetup" );
+      $("#runningMode-text").removeClass( "runningModeSimulation" );
+      
+      if ( mode == "setup" )
+      {
+        $( ".runningMode" ).show();
+        $("#runningMode-text").addClass( "runningModeSetup" );
+        $("#runningMode-text").text( "Setup Mode" );
+      }
+      else if ( mode == "simulation" )
+      {
+        $( ".runningMode" ).show();
+        $("#runningMode-text").addClass( "runningModeSimulation" );
+        $("#runningMode-text").text( "Simulation Mode" );
+      }
+      else if ( mode == "production" )
+      {
+        $( ".runningMode" ).show();
+        $("#runningMode-text").addClass( "runningModeProduction" );
+        $("#runningMode-text").text( "Production Mode" );
+      }
+      else
+      {
+         $( ".runningMode" ).hide();
+         $("#runningMode-text").text( "" );
+         setStartDate( "" );
+      }
+}
+
+function setSensorsChanged( changed )
+{
+      if ( changed )
+      {
+        $("#applySensorDB").removeClass( "btn-secondary" );
+        $("#applySensorDB").addClass( "btn-danger" );
+        $("#applySensorDB").removeClass( "disabled" );
+      }
+      else
+      {
+        $("#applySensorDB").addClass( "btn-secondary" );
+        $("#applySensorDB").removeClass( "btn-danger" );
+        $("#applySensorDB").addClass( "disabled" );
+      }
+}
+
+function updateSensorsChanged()
+{
+      $.ajax({ url: "get?sensorsChanged=true",
+        success: function(data){
+             setSensorsChanged( data.sensorsChanged );
+        },
+        error: function (request, status, error) {
+             setSensorsChanged( false );
+        }
+      });
+}
+
+function checkRunningMode( mode )
+{
+      $.ajax({ url: "lidarTool/get?runningMode=true",
+        success: function(data){
+             setRunningMode( data.runningMode );
+        },
+        error: function (request, status, error) {
+             setRunningMode( "unknown" );
+        }
+      });
+}
+
+function setRunMode( mode )
+{
+      if ( mode == runMode )
+        return;
+
+      runMode = mode;
+
+      if ( runMode == "setup" )
+        $("#mode-text").text( "Setup" );
+      else if ( runMode == "simulation" )
+        $("#mode-text").text( "Simulation" );
+      else
+        $("#mode-text").text( "Production" );
+}
+
+function setHasNodes( set )
+{
+      $('.hasNodes').attr('hidden', !set );
+}
+
+function setUseNodes( set )
+{
+      $('.useNodes').attr('hidden', !set );
+}
+
+function setHasSimulation( set )
+{
+      $('.hasSimulation').attr('hidden', !set );
+}
+
+function setHasSensors( set )
+{
+      $('.hasSensors').attr('hidden', !set );
+}
+
+function setEditSensors( set )
+{
+      $('.editSensors').attr('hidden', set );
+      $('.editSensorsPane').attr('hidden', !set );
+      $('.nodelistPane').attr('hidden', set );
+
+      if ( set )
+      {
+        $.ajax({ url: "sensorDB",
+          success: function(data){
+             $('#sensorDB')[0].value = data;
+             lastSensorDB = $('#sensorDB')[0].value;
+           },
+           error: function (request, status, error) {
+             $('#sensorDB')[0].value = "";
+           }
+        });
+      }
+}
+
+function updateRunMode()
+{
+      $.ajax({ url: "get?runMode=true&useNodes=true&hasNodes=true&hasSensors=true&hasSimulation=true",
+        success: function(data){
+           setRunMode( data.runMode );
+           setUseNodes( data.useNodes );
+           setHasNodes( data.hasNodes );
+           setHasSensors( data.hasSensors );
+           setHasSimulation( data.hasSimulation );
+         },
+         error: function (request, status, error) {
+           setRunMode( "production" );
+           setUseNodes( false );
+           setHasNodes( false );
+           setHasSensors( false );
+           setHasSimulation( false );
+         }
+      });
+}
+
+function setHubMode( hub )
+{
+      if ( hub == hubMode )
+        return;
+
+      hubMode = hub;
+
+      if ( hubMode == "noHub" )
+      {
+        $("#hub-text").text( "NoHub" ); 
+        $("#dropdownMenuButton-hub").removeClass( "btn-success" );
+        $("#dropdownMenuButton-hub").addClass( "btn-danger" );
+      }
+      else
+      {
+        $("#hub-text").text( "Hub" );
+        $("#dropdownMenuButton-hub").removeClass( "btn-danger" );
+        $("#dropdownMenuButton-hub").addClass( "btn-success" );
+      }
+}
+
+function updateHubMode()
+{
+      $.ajax({ url: "get?hubMode=true",
+        success: function(data){
+           setHubMode( data.hubMode );
+         },
+         error: function (request, status, error) {
+           setHubMode( "Hub" );
+         }
+      });
+}
+
+function updateHUB()
+{
+      $.ajax({ url: "get?hasHUB=true",
+        success: function(data){
+         if ( data.hasHUB )
+           $( ".hasHub" ).show();
+         else
+           $( ".hasHub" ).hide();
+         },
+         error: function (request, status, error) {
+           $('.hasHub').attr('hidden',true);
+         }
+      });
+}
+
+
+
+function setBuisy( li, buisy )
+{
+      if ( buisy )
+      {
+        $(li).addClass( "fa" );
+        $(li).addClass( "fa-refresh" );
+        $(li).addClass( "fa-spin" );
+      }
+      else
+      {
+        $(li).removeClass( "fa" );
+        $(li).removeClass( "fa-refresh" );
+        $(li).removeClass( "fa-spin" );
+      }
+}
+
+function restartServer()
+{
+  var cmd = "rerun";
+  lastNodeList = "";
+  $.ajax({ url: cmd,
+           success: function() { rerun = true; setBuisy( $(".startStopServer"), true ); }
+  });
+}
+
+function applySensorDB()
+{
+      $.ajax({ url: "nodes?setup=true",
+        complete: function(data){
+          if ( confirm("Restart Server ?") == true) {  
+            restartServer();
+          }
+        }
+      });
+}
+
+
+$(document).ready(function(){
+      $(".nav-tabs a").click(function(){
+          if ( $(this).attr("id") == "lidar-ui" )
+              window.open( window.location.protocol + '//' + window.location.hostname + ':8080', "lidar-ui" );
+          else if ( $(this).attr("id") == "lidar-hub" )
+              window.open( window.location.protocol + '//' + window.location.hostname + ':8081', "lidar-hub" );
+          else
+              $(this).tab('show');
+      });
+
+      $.ajax({ url: "get?confName=true",
+         success: function(data)
+          { $("#confName").text(data.confName);
+            document.title = "Lidar Admin - " + data.confName;
+          }
+      });
+
+      
+
+      setEditSensors( false );
+      updateRunMode();
+      updateHubMode();
+      updateHUB();
+
+      $("#startAllNodes").click(function(){
+        $.ajax({ url: "nodes?run=true" });
+      });
+
+      $("#stopAllNodes").click(function(){
+        $.ajax({ url: "nodes?kill=true" });
+      });
+
+      $("#rebootAllNodes").click(function(){
+        $.ajax({ url: "nodes?reboot=true" });
+      });
+
+      $("#applySensorDB").click(function(){
+        applySensorDB();
+      });
+
+      $(".btn-runMode").click(function(){
+        var runMode = "production";
+        var text    = $(this).text();
+
+       if ( text == "Setup" )
+          runMode = "setup";
+        else if ( text == "Simulation" )
+          runMode = "simulation";
+
+        $.ajax({ url: "set?runMode="+runMode });
+        updateRunMode();
+      });
+
+      $(".btn-hubMode").click(function(){
+        var hubMode = "hub";
+        var text    = $(this).text();
+
+       if ( text == "NoHub" )
+          hubMode = "noHub";
+        else
+          hubMode = "hub";
+
+        $.ajax({ url: "set?hubMode="+hubMode });
+        updateHubMode();
+      });
+
+      $("#editSensors").click(function(){ setEditSensors(true); });
+      $("#cancelEditSensors").click(function(){
+          setEditSensors(false);
+      });
+      $("#saveEditSensors").click(function(){
+
+          var data = $('#sensorDB')[0].value;
+          if ( lastSensorDB == data )
+          { setEditSensors(false);
+            return;
+          }
+          var formData = new FormData();
+          formData.append("sensorDB", data );
+          $.ajax({
+            type: "POST",
+            contentType: false,
+            processData: false,
+            url: "sensorDB",
+            data: formData,
+            success: function(){ setEditSensors(false); applySensorDB(); },
+            error:   function(){ setEditSensors(false); }
+          });
+      });
+
+      var interval = setInterval(function () {
+      
+      if ( $("#home").hasClass( "active" ) )
+      {
+        if ( hubMode == "hub" )
+        {
+          $.ajax({ url: "lidarHUB/get?isStarted=true",
+            success: function(data){
+
+            if ( data.isStarted )
+            {
+              $('#hubRunning').removeClass( "error" );
+              $('#hubRunning').removeClass( "stopped" );
+              $('#hubRunning').addClass( "ok" );
+            }
+            else if ( data )
+            {
+              $('#hubRunning').removeClass( "error" );
+              $('#hubRunning').addClass( "stopped" );
+              $('#hubRunning').removeClass( "ok" );
+            }
+ 
+           },
+            error: function (request, status, error) {
+               $('#hubRunning').addClass( "error" );
+               $('#hubRunning').removeClass( "ok" );
+               $('#hubRunning').removeClass( "stopped" );
+            }
+          });
+        }
+
+        $.ajax({ url: "lidarTool/get?sensorsStarted=true&deviceHealth=true&appStartDate=true",
+            success: function(data){
+
+            $('#status').html("");
+
+            $('#deviceHealth').removeClass( "ok" );
+            $('#deviceHealth').removeClass( "error" );
+            $('#deviceHealth').removeClass( "warning" );
+            $('#deviceHealth').removeClass( "stopped" );
+            $('#deviceHealth').addClass( data.deviceHealth );
+
+            if ( data.sensorsStarted )
+            {
+               var text = "Stop Sensors";
+               if ( text != buisyButtonText( 'startStop' ) )
+               { setBuisyButtonText( 'startStop', text );
+                 $('#startStop').addClass( "btn-danger" );
+                 $('#startStop').removeClass( "btn-warning" );
+                 $('#startStop').removeClass( "btn-success" );
+                 setBuisy( $(".startStop"), false );
+                 rerun = false;
+                 setStartDate( data.appStartDate );
+                 checkRunningMode();
+               }
+            }
+            else if ( data )
+            {
+               var text = "Start Sensors";
+               if ( text != buisyButtonText( 'startStop' ) )
+               { setBuisyButtonText( 'startStop', text );
+                 $('#startStop').removeClass( "btn-danger" );
+                 $('#startStop').removeClass( "btn-warning" );
+                 $('#startStop').addClass( "btn-success" );
+                 setBuisy( $(".startStop"), false );
+                 setStartDate( data.appStartDate );
+                 checkRunningMode();
+               }
+            }
+            },
+            error: function (request, status, error) {
+               $('#status').html( "Server not running");
+                 
+               var text = "Start Server";
+               if ( text != buisyButtonText( 'startStop' ) )
+               { setBuisyButtonText( 'startStop', text );
+                 $('#startStop').removeClass( "btn-danger" );
+                 $('#startStop').removeClass( "btn-success" );
+                 $('#startStop').addClass( "btn-warning" );
+                 if ( !rerun )
+                   setBuisy( $(".startStop"), false );
+                 setStartDate( "" );
+                 setRunningMode( "" );
+               }
+               $('#deviceHealth').addClass( "error" );
+               $('#deviceHealth').removeClass( "ok" );
+               $('#deviceHealth').removeClass( "warning" );
+               $('#deviceHealth').removeClass( "stopped" );
+            }
+        });
+        $.ajax({ url: "space",
+           success: function(data){
+               $('#filesystem').html(data);
+           },
+           error: function (request, status, error) {
+               $('#filesystem').html( "" );
+           }
+        });
+        $.ajax({ url: "lidarTool/lastErrors",
+           success: function(data){
+               $('#lastErrors').html(data);
+           },
+           error: function (request, status, error) {
+               $('#lastErrors').html( "" );
+           }
+        });
+      }
+      else if ( $("#sensors").hasClass( "active" ) )
+      {
+        $.ajax({ url: "lidarTool/deviceList",
+           success: function(data){
+               $('#deviceList').html(data);
+           },
+           error: function (request, status, error) {
+               $('#deviceList').html( "Server not running");
+           }
+        });
+      }
+      else if ( $("#nodes").hasClass( "active" ) )
+      {
+        if ( !nodesBuisy )
+        {
+          nodesBuisy = true;
+      
+          updateRunMode();
+          updateHubMode();
+          updateSensorsChanged();
+
+          $.ajax({ url: "lidarTool/get?sensorsStarted=true",
+            success: function(data){
+               var text = "Stop Server";
+               if ( text != buisyButtonText( 'startStopServer' ) )
+               { setBuisyButtonText( 'startStopServer', text );
+                 $('#startStopServer').removeClass( "btn-success" );
+                 $('#startStopServer').removeClass( "btn-warning" );
+                 $('#startStopServer').addClass( "btn-danger" );
+                 setBuisy( $(".startStopServer"), false );
+                 rerun = false
+               }
+            },
+            error: function (request, status, error) {
+               var text = "Start Server";
+               if ( text != buisyButtonText( 'startStopServer' ) )
+               { setBuisyButtonText( 'startStopServer', text );
+                 $('#startStopServer').removeClass( "btn-danger" );
+                 if ( rerun )
+                   $('#startStopServer').addClass( "btn-warning" );
+                 else
+                 { setBuisy( $(".startStopServer"), false );
+                   $('#startStopServer').addClass( "btn-success" );
+                 }
+               }
+            }
+          });
+
+          $.ajax({ url: "nodeList",
+             success: function(data){
+
+              if ( lastNodeList != data && window.getSelection() == "" )
+              {
+                 lastNodeList = data;
+                 $('#nodeList').html(data);
+
+                 $(".btn-setup").click(function(){
+                     $.ajax({ url: "nodes?setup=true&ip="+$(this).prop('name') });
+                 });
+
+                 $(".btn-reboot").click(function(){
+                     $.ajax({ url: "nodes?reboot=true&ip="+$(this).prop('name') });
+                 });
+
+                 $(".btn-shutdown").click(function(){
+                     $.ajax({ url: "nodes?shutdown=true&ip="+$(this).prop('name') });
+                 });
+
+                 $(".btn-remove").click(function(){
+                     if ( confirm("Rmove Entry ?") == true) {  
+                       $.ajax({ url: "nodes?remove=true&mac="+$(this).prop('name') });
+                     }
+                 });
+
+                 $(".btn-edit-sin").click(function(){
+                    window.open( "http://"+$(this).prop('id'), $(this).prop('id') );
+                 });
+
+                 $(".btn-lidarTool").click(function(){
+                    window.open( "http://"+$(this).prop('id'), $(this).prop('id') );
+                 });
+
+                 $(".btn-startStop").click(function(){
+                     var cmd;
+                     if ( $(this).text() == "running" )
+                         cmd = "kill";
+                     else
+                         cmd = "run";
+                     $.ajax({ url: "nodes?"+cmd+"=true&ip="+$(this).prop('id') });
+                 });
+
+                 $(".btn-enable").click(function(){
+                     var enable = "true";
+                     if ( $(this).text() == "+" )
+                       enable = "false";
+                     $.ajax({ url: "nodes?enable="+enable+"&name="+$(this).prop('name') });
+                 });
+
+                 $(".btn-enablePower").click(function(){
+      console.log( "nodes?enablePower="+$(this).prop('checked')+"&ip="+$(this).prop('name') )
+                     $.ajax({ url: "nodes?enablePower="+$(this).prop('checked')+"&ip="+$(this).prop('name') });
+                 });
+
+                 $(".btn-setid").click(function(){
+                     $.ajax({ url: "nodes?setNodeId=true&ip="+$(this).prop('name')+"&nodeId="+$(this).attr("id") });
+                 });
+               }
+
+               nodesBuisy = false;  
+             },
+             error: function (request, status, error) {
+                 $('#nodeList').html( "Server not running");
+                 nodesBuisy = false;  
+             }
+          });
+        }
+       }
+      }, 1500 );
+
+      $("#startStop").click(function(){
+        var cmd = "";
+        var text = buisyButtonText('startStop');
+
+        if ( text == "Start Sensors" )
+          cmd = "lidarTool/startSensors";
+        else if ( text == "Stop Sensors" )
+          cmd = "lidarTool/stopSensors";
+        else if ( text == "Start Server" )
+          cmd = "run";
+        
+        if ( cmd != "" )
+        { setBuisy( $(".startStop"), true );
+          $.ajax({ url: cmd });
+        }
+      });
+
+      $(".btn-restart").click(function(){
+         cmd = "rerun";
+         setBuisy( $(".startStop"), true );
+         rerun = true;
+         $.ajax({ url: cmd });
+      });
+
+      $(".btn-restart-hub").click(function(){
+        cmd = "rerun?hub=true";
+        $.ajax({ url: cmd });
+      });
+
+      $(".btn-restartServer").click(function(){
+        restartServer();
+      });
+
+      $(".btn-restartNoSensors").click(function(){
+        cmd = "rerun?noSensors=true";
+        setBuisy( $(".startStopServer"), true );
+        rerun = true;
+        $.ajax({ url: cmd });
+      });
+
+      $(".btn-stopServer").click(function(){
+        cmd = "kill";
+        setBuisy( $(".startStopServer"), true );
+        $.ajax({ url: cmd });
+      });
+
+      $(".btn-stop-hub").click(function(){
+        cmd = "kill?hub=true";
+        setBuisy( $(".startStopServer"), true );
+        $.ajax({ url: cmd });
+      });
+
+      $("#startStopServer").click(function(){
+        var cmd = "";
+        var text = buisyButtonText('startStopServer');
+
+        if ( text == "Start Server" )
+          cmd = "run";
+        else if ( text == "Stop Server" )
+          cmd = "kill";
+        
+        if ( cmd != "" )
+        { setBuisy( $(".startStopServer"), true );
+          $.ajax({ url: cmd });
+        }
+      });
+
+});
+</script>
+
+</body>
+</html>

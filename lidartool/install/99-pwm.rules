@@ -1,0 +1,5 @@
+#SUBSYSTEM=="pwm*", PROGRAM="/bin/sh -c 'chown -R root:gpio /sys/class/pwm && chmod -R 770 /sys/class/pwm; chown -R root:gpio /sys/devices/platform/soc/*.pwm/pwm/pwmchip*  && chmod -R 770 /sys/devices/platform/soc/*.pwm/pwm/pwmchip*'"
+SUBSYSTEM=="pwm*", PROGRAM="/bin/sh -c '\
+	echo 0 > /sys/class/pwm/pwmchip%n/export;\
+        chown -R root:dialout /sys/class/pwm/pwmchip%n/* && chmod -R g+rwx /sys/class/pwm/pwmchip%n/*;\
+'"

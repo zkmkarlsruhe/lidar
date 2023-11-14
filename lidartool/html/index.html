@@ -1,0 +1,1868 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2022 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="bootstrap-5.1.3.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <link rel="stylesheet" href="Jcrop-2.0.4.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="jquery-3.4.1.min.js"></script>
+  <script src="bootstrap-5.1.3.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+  <script src="Jcrop-2.0.4.min.js"></script>
+  <script src="hammer.min.js"></script>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+<style>
+
+.dropdown-menu li{
+	position: relative;
+}
+.dropdown-menu .submenu-left{ 
+      display: none;
+      position: absolute;
+      right:100%; left:auto; top:-9px;
+}
+.dropdown-menu .submenu{ 
+      display: none;
+      position: absolute;
+      left:100%; top:-9px;
+}
+.dropdown-menu > li:hover{ background-color: #f1f1f1 }
+.dropdown-menu > li:hover > .submenu{
+	display: block;
+}
+
+.dropdown-menu > li:hover > .submenu-left{
+	display: block;
+}
+
+html, body {
+    width: calc(100%);
+    height: calc(100%);
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: transparent;
+    background-color: #000000;
+}
+
+canvas {
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: #00000000;
+    opacity: 0.5;
+}
+
+#myHeader {
+    height: 31px;
+    background: #d0d0d0;
+}
+
+#image {
+  padding-top: 31px;
+  width: calc(100%);
+  height: calc(100%);
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+#body {
+  width: calc(100%);
+  height: calc(100%);
+}
+
+#canvas {
+  padding-top: 31px;
+  z-index: 0;
+}
+
+#bpSlider {
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 18;
+    top: 31px;
+    background: transparent;
+    background-color: #00000;
+    height: calc(100%);
+    z-index: 2;
+}
+
+#bpSlider-range {
+    -webkit-appearance: slider-vertical;
+    margin: 10px;
+    height: calc(100% - 51px);
+    width: 20px;
+    opacity: 0.4;
+    z-index: 2;
+}
+
+#timeSlider {
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    bottom: 10;
+    background: transparent;
+    background-color: #00000;
+    width: calc(100%);
+    z-index: 2;
+}
+
+#timeSlider-range {
+    -webkit-appearance: slider-horizontal;
+    margin: 10px;
+    margin-left: 40px;
+    width: calc(100% - 50px);
+    height: 20px;
+    opacity: 0.7;
+    z-index: 2;
+}
+
+#playPause {
+    margin: 0;
+    left: 10;
+    overflow: hidden;
+    position: absolute;
+    bottom: 16;
+    background: transparent;
+    height: 30;
+    color: #ffffff;
+    z-index: 2;
+}
+
+#playPause-button {
+    margin: 5px;
+    z-index: 2;
+}
+
+input.faChk {
+  visibility: hidden;
+}
+
+input.faChk:checked:after, input.faChk:after {
+  visibility: visible;
+  font-family: FontAwesome;
+  font-size:20px;height: 25px; width: 25px;
+  position: relative;
+  top: -5px;
+  left: -5px;
+  background-color:#000;
+  color: #FFF;
+  background: transparent;
+  display: inline-block;
+}
+
+input.faChk:checked:after {
+  content: '\f04b';
+}
+
+input.faChk:after {
+  content: '\f04c';
+}
+
+#doneRegions, #saveBlueprint, #regionShape {
+  z-index: 3;
+}
+
+.raquo { float: right; }
+.laquo { float: left; }
+.btn { height: 3vh;
+      height: 24px;
+      padding:.15rem .75rem;
+      font-size:.750rem;
+      border-radius:.1.5rem
+}
+.nav-link { height: 3vh;
+      height: 24px;
+      padding:.15rem .5rem;
+      font-size:.750rem;
+      border-radius:.1.5rem
+}
+.navbar-text { height: 3vh;
+      height: 24px;
+      padding:.15rem .5rem;
+      font-size:.750rem;
+      border-radius:.1.5rem
+}
+.dropdown-item {
+      height: 22px;
+      font-size:.750rem;
+}
+
+.dropdown-thin a {
+    height: 22px;
+    padding-top: 2px;
+}
+
+.bottom-right {
+    position: absolute;
+    right: 10;
+    bottom: 10;
+}
+
+.top-right {
+    position: absolute;
+    right: 10;
+    top: 40;
+}
+
+body, image {
+ -webkit-user-select: none;
+ -moz-user-select: none;
+ -ms-user-select: none;
+ user-select: none;
+ }
+
+</style>
+
+<title>Lidar Setup</title>
+  <script>
+  var interval;
+  var lastX, lastY, touchX, touchY, lastScale = 1, isDown = false;
+  var control = "camera";
+  var isMoving = false;
+  var moveX = 0;
+  var moveY = 0;
+  var rect = false;
+  var jcp = false;
+  var webId = "";
+  var clientId = "";
+  var boxes = [];
+  var isEditingRegions = false;
+  var region = [];
+  var regionName = "Region 1";
+  var updateFreq = 200;
+  var imageInProgress = false;
+  var hammertime;
+  const headerHeight = 31;
+  var bpCanvas, bpContext;
+  var blueprintImg  = new Image();
+  var trackOcclImg  = new Image();
+  var useBlueprints = false;
+  var useObstacle   = false;
+  var hasPlayPos    = false;
+  var hasLidar      = true;
+  var expertMode    = false;
+  var isPaused      = false;
+  var bsx = 1, bsy  = 1, btx = 0, bty = 0;
+
+  var hasRegionChanges       = false;
+  var hasRegistrationChanges = false;
+  var hasBlueprintChanges    = false;
+  var hasEnvChanges          = false;
+
+  function activateUpdate()
+  {
+      if ( interval != 0 )
+        clearInterval( interval );
+
+      imageInProgress = false;
+
+//      console.log( "activate updateFreq: "+updateFreq );
+
+      interval = setInterval(function () {
+
+//      console.log( "interval" );
+
+      showPoints = $("#showPoints").prop('checked');
+      showLines = $("#showLines").prop('checked');
+      showOutline = $("#showOutline").prop('checked');
+      showEnv = $("#showEnv").prop('checked');
+      showEnvThres = $("#showEnvThres").prop('checked');
+      showCoverage = $("#showCoverage").prop('checked');
+      showCoverPoints = $("#showCoveragePoints").prop('checked');
+      showObjects = $("#showObjects").prop('checked');
+      showObjCircle = $("#showObjCircle").prop('checked');
+      showConfidence = $("#showConfidence").prop('checked');
+      showCurvature = $("#showCurvature").prop('checked');
+      showSplitProb = $("#showSplitProb").prop('checked');
+      showMotion = $("#showMotion").prop('checked');
+      showLifeSpan = $("#showLifeSpan").prop('checked');
+      showMotionPred = $("#showMotionPred").prop('checked');
+      showMarker = $("#showMarker").prop('checked');
+      showTracking   = $("#showTracking").prop('checked');
+      showDevLocation = $("#showDevLocation").prop('checked');
+      showDeviceInfo = $("#showDevInfo").prop('checked');
+      showObsvStat = $("#showObsvStat").prop('checked');
+      showRegions = $("#showRegions").prop('checked');
+      showStages = $("#showStages").prop('checked');
+      showGrid = $("#showGrid").prop('checked');
+      showObst = $("#showObstacles").prop('checked');
+      showPrivate = $("#showPrivate").prop('checked');
+      showControls = $("#showControls").prop('checked');
+      
+      var map = '';
+
+      $("[id^=map_]").each(function(){ 
+        if ( $(this).prop('checked') )
+          map = $(this).prop('name');
+      }); 
+
+      var showDevices = "";
+      $("[content^=showDevice]").each(function(){
+          showDevices += "&" + $(this).attr('content') + "=" + $(this).prop('checked');
+        });
+
+      if ( useBlueprints ) {
+        $.ajax({ url: "get?bpTsf=true",
+          success: function(data){
+            bsx = data.bptsf[0];
+            bsy = data.bptsf[1];
+            btx = data.bptsf[2];
+            bty = data.bptsf[3];
+          }
+        }); 
+      }
+
+      if ( !imageInProgress )
+      {
+        imageInProgress = true;
+      
+        width  =  $("#image").prop("width");
+        height =  $("#image").prop("height");
+      
+        if ( hasPlayPos )
+        { $.ajax({ url: "get?playPos=true&isPaused=true",
+             success: function(data) {
+                $('#timeSlider-range').val( data.playPos );
+                $('#playPause-button').prop('checked',data.isPaused);
+             }
+          });
+        }
+
+        $("#image").attr("src", "image" + `?v=${Math.random()}` + "&showPoints="+showPoints + "&showLines="+showLines + "&showOutline="+showOutline + "&showEnv="+showEnv + "&showEnvThres="+showEnvThres + "&showCoverage="+showCoverage + "&showCoverPoints="+showCoverPoints + "&showObjects="+showObjects + "&showObjCircle="+showObjCircle + "&showConfidence="+showConfidence + "&showCurvature="+showCurvature + "&showSplitProb="+showSplitProb + "&showMotion="+showMotion + "&showLifeSpan="+showLifeSpan + "&showMotionPred="+showMotionPred + "&showMarker="+showMarker + "&showTracking="+showTracking + "&showRegions="+showRegions + "&showStages="+showStages + "&showGrid="+showGrid + "&showObstacles=" + showObst + "&showControls=" + showControls + "&showPrivate=" + showPrivate + "&showDevLocation="+showDevLocation + "&showDeviceInfo="+showDeviceInfo + "&showObsvStat="+showObsvStat + "&width="+width + "&height="+height+showDevices + "&map="+map);
+      }
+      }, updateFreq);
+  }
+ 
+      function getControl( forceCamera )
+      {
+        var result = 'control=';
+        if ( forceCamera )
+          result+='camera';
+        else
+          result+=control;
+        if ( control == 'device' )
+        {
+          $("[content^=moveDevice]").each(function(){ 
+            if ( $(this).prop('checked') )
+              result += '&'+$(this).prop('name') + '=true';
+          });
+        }
+        return result;
+      }
+
+      function markChangesByControl( forceCamera )
+      {
+        if ( forceCamera )
+          return;
+
+        if ( control == 'device' )
+          hasRegistrationChanges = true;
+        else if ( control == 'blueprint' )
+          hasBlueprintChanges = true;
+      }
+
+    function reloadGroups() {
+
+      $.ajax({ url: "availableGroups.html",
+        success: function(data){
+
+//      console.log( data );
+
+          $('#availableGroups').replaceWith( data );
+          $("[id^=avGroup_]").each(function(){
+            $(this).change(function(){
+              activateGroups();
+            });
+          });
+        }
+      }); 
+    }
+
+    function propagateChecked( el )
+    {  var checked = $(el).prop('checked');                   
+       $("[content="+$(el).attr('content')+"]").each(function(){ $(this).prop('checked',checked); });
+    }
+
+    function reloadState() {
+
+      updateFreq = 200;
+      activateUpdate();
+
+      $.ajax({ url: "get?adaptEnv=true",
+        success: function(data){ $('#adaptEnv').prop('checked',data.adaptEnv?'checked':''); } 
+      }); 
+
+      $.ajax({ url: "get?useEnv=true",
+        success: function(data){ $('#useEnv').prop('checked',data.useEnv?'checked':''); } 
+      }); 
+
+      $.ajax({ url: "get?useGroups=true",
+        success: function(data){
+          $('.hasGroups').attr('hidden',!data.useGroups);
+        } 
+      }); 
+
+      $.ajax({ url: "get?hasRemote=true",
+        success: function(data){
+          $('.hasRemote').attr('hidden',!data.hasRemote);
+        } 
+      }); 
+
+      $.ajax({ url: "get?useBluePrints=true&useOcclusion=true",
+        success: function(data){ 
+          setUseBlueprints( data.useBluePrints );
+          $(".hasOcclusion").attr("hidden",!data.useOcclusion||!data.useBluePrints);
+          if ( useBlueprints ) {
+            blueprintImg.src = "blueprint";
+            blueprintImg.onload = () => {
+              window.onresize = function() { resizeCanvas(); };
+              resizeCanvas();
+              if ( data.useOcclusion )
+                trackOcclImg.src = "trackoccl";
+            }
+          }
+        } 
+      }); 
+
+      $.ajax({ url: "get?useObstacle=true",
+        success: function(data){ 
+          setUseObstacle( data.useObstacle );
+        } 
+      }); 
+
+      $.ajax({ url: "visibleDevices.html",
+        success: function(data){ 
+            $(".visibleDevices-item").remove();
+            $('#visibleDevices').replaceWith( data );
+
+            $("[id^=showGroup]").each(function(){ 
+               let group = $(this).prop('name');
+               let isAll = $(this).prop('id').startsWith( "showGroupAll" );
+               $(this).click(function(){
+                   $("[content^=showDevice][alt=\""+group+"\"]").each(function(){ 
+                     $(this).prop('checked',isAll);
+                     propagateChecked( this );
+                   });
+               });
+            });
+
+
+            $("[content^=visibleDevice]").each(function(){
+                 $(this).change(function(){
+                   propagateChecked( this );
+                 });
+            });
+        }
+      }); 
+
+      $.ajax({ url: "runDevices.html",
+        success: function(data){
+            $(".runDevices-item").remove();
+            $('#runDevices').replaceWith( data );
+
+            $("[id^=runGroup]").each(function(){ 
+               let group = $(this).prop('name');
+               let isAll = $(this).prop('id').startsWith( "runGroupAll" );
+               $(this).click(function(){
+                   $("[content^=runDevice][alt=\""+group+"\"]").each(function(){ 
+                     $(this).prop('checked',isAll);
+                     propagateChecked( this );
+                   });
+
+                   runDevices();
+               });
+            });
+
+            $("[content^=runDevice]").each(function(){
+                 $(this).change(function(){
+                   propagateChecked( this );
+                   $.ajax({ url: 'run?'+$(this).prop('name')+'='+$(this).prop('checked') }); 
+                 });
+            });
+        }
+      }); 
+
+      $.ajax({ url: "rebootNodes.html",
+        success: function(data){
+            $(".rebootNodes-item").remove();
+            $('#rebootNodes').replaceWith( data );
+
+            $('#rebootThis').click(function(){
+               if ( confirm("Reboot This ?") == true)
+                   $.ajax({ url: 'reboot?this=true' });
+            });
+
+            $('#rebootAll').click(function(){
+               if ( confirm("Reboot All Remote ?") == true)
+                   $.ajax({ url: 'reboot?all=true' });
+            });
+
+            $("[id^=rebootGroup]").each(function(){ 
+               $(this).click(function(){
+                   $.ajax({ url: 'reboot?group='+$(this).prop('name') });
+               });
+            });
+
+            $("[id^=rebootNodes_]").each(function(){ 
+               $(this).click(function(){
+                   $.ajax({ url: 'reboot?'+$(this).prop('name')+'=true' });
+               });
+            });
+        }
+      }); 
+
+      $.ajax({ url: "movableDevices.html",
+        success: function(data){
+            $(".movableDevices-item").remove();
+            if ( hasLidar )
+              $('#movableDevices').replaceWith( data );
+
+           $("[content^=moveDevice]").each(function(){ 
+                 $(this).change(function(){
+                 propagateChecked( this );
+                 if ( $(this).prop('checked') )
+                 { updateControl( 'device' );
+                   $.ajax({ url: 'move?ref='+$(this).prop('name') }); 
+                 }
+                 else
+                   preventEmptyControl( this );
+
+               });
+            });
+        }
+      }); 
+
+      loadRegions();
+    }
+      
+    function setDevicesMovable(set) {
+            $("[content^=moveDevice]").each(function(){ 
+               $(this).prop('checked',set);
+            });
+    }
+      
+    function setShowDevices(set) {
+            $("[content^=showDevice]").each(function(){ 
+               $(this).prop('checked',set);
+            });
+    }
+
+    function setAllGroups(set) {
+            $("[id^=avGroup_]").each(function(){ 
+               $(this).prop('checked',set);
+            });
+            activateGroups();
+    }
+
+    function activateGroups()
+    {
+      var groups = "";
+      $("[id^=avGroup_]").each(function(){ 
+        if ( $(this).prop('checked') )
+        { if ( groups != "" )
+            groups += ",";
+          groups += $(this).prop('name');
+        }
+      });
+
+      if ( groups == "" )
+        groups = "none";
+
+//      console.log( "set?group="+groups );
+
+      $.ajax({ url: "set?group="+groups,
+         success: function(data){ reloadState(); }
+      });
+    }
+
+    function updateControl( ctrl )
+    {
+      control = ctrl;
+      $('#camera').prop('checked',ctrl=='camera');
+      $('#world').prop('checked',ctrl=='world'||ctrl=='device');
+      $('#blueprint').prop('checked',ctrl=='blueprint');
+      $('#obstacle').prop('checked',ctrl=='obstacle');
+
+      $('#cameraWorldControl').removeClass( "btn-danger" );
+      $('#cameraWorldControl').removeClass( "btn-success" );
+
+      if ( ctrl=='camera' )
+      { $('#cameraWorldControl').text( "Camera" );
+        $('#cameraWorldControl').addClass( "btn-success" );
+      }
+      else if ( ctrl=='device' )
+      { $('#cameraWorldControl').text( "Device" );
+        $('#cameraWorldControl').addClass( "btn-danger" );
+      }
+      else if ( ctrl=='world' )
+      { $('#cameraWorldControl').text( "Devices" );
+        $('#cameraWorldControl').addClass( "btn-danger" );
+      }
+      else if ( ctrl=='blueprint' )
+      { $('#cameraWorldControl').text( "Blueprint" );
+        $('#cameraWorldControl').addClass( "btn-danger" );
+      }
+      else if ( ctrl== 'obstacle')
+      { $('#cameraWorldControl').text( "Obstacle" );
+        $('#cameraWorldControl').addClass( "btn-danger" );
+      }
+      if ( ctrl!='device' )
+        setDevicesMovable( ctrl=='world' );
+      $('#saveBlueprint').attr('hidden',ctrl!='blueprint');
+    }
+
+    function preventEmptyControl( el )
+    {
+      var hasControl = false;
+      if ( $('#world').prop('checked') )
+        hasControl = true;
+      else if ( $('#camera').prop('checked') || $('#blueprint').prop('checked') || $('#obstacle').prop('checked') )
+        hasControl = true;
+      else {
+        $("[content^=moveDevice]").each(function(){
+          if ( $(this).prop('checked') )
+            hasControl = true;
+        });
+      }
+      if ( !hasControl )
+        $(el).prop('checked',true);
+      
+      if ( !$('#saveBlueprint').prop('checked') )
+        $('#saveBlueprint').attr('hidden',true);
+    }
+
+    function showBlueprint(set) {
+        $('#canvas').attr("hidden",!set);
+        $('#blueprint_ctl').attr("hidden",!set || !$('#showControls').prop("checked"));
+        $('#bpSlider').attr("hidden",!set || !$('#showControls').prop("checked"));
+
+        if ( !set && control == 'blueprint' )
+          setCameraControl( true ); 
+    }
+
+    function setUseBlueprints(set) {
+        useBlueprints = set;
+        $('.hasBlueprints').attr("hidden",!set);
+        showBlueprint(set);
+        $('#displayBlueprint').prop('checked',set);
+    }
+
+    function showObstacles(set) {
+        $('#obstacle_ctl').attr("hidden",!set);
+        if ( !set && control == 'obstacle' )
+          setCameraControl( true ); 
+    }
+
+    function showMenu(set) {
+        var padding = (set ? "31px" : "0px");
+        $('#myHeader').attr("hidden", !set );
+        $('#image').css("padding-top", padding );
+        $('#canvas').css("padding-top", padding );
+    }
+
+    function setUseObstacle(set) {
+        useObstacle = set;
+//      console.log( "setObstacle: "+set)
+        $('#displayObstacle').attr("hidden",!set);
+        showObstacles(set);
+        $('#displayObstacle').prop('checked',set);
+    }
+
+    function setCameraControl(set) {
+      if ( set )
+      {
+        updateControl( 'camera' );
+      }
+      else
+        preventEmptyControl( this );
+    }
+     
+    function setBlueprintControl(set) {
+      if ( set )
+      {
+        updateControl( 'blueprint' );
+      }
+      else
+        preventEmptyControl( this );
+    }        
+
+    function setObstacleControl(set) {
+      if ( set )
+      {
+        updateControl( 'obstacle' );
+      }
+      else
+        preventEmptyControl( this );
+    }        
+
+    function runDevices() {
+        $("[content^=runDevice]").each(function(){
+           $.ajax({ url: 'run?'+$(this).prop('name')+'='+$(this).prop('checked') }); 
+        });
+    }
+
+    function setRunDevices( set ) {
+        $("[content^=runDevice]").each(function(){
+            $(this).prop('checked',set);
+          });
+    }
+
+     function loadEditRegions() {
+
+      $.ajax({ url: "editRegions.html",
+        success: function(data) {
+            $('#editRegs').replaceWith( data );
+            $("[id^=editRegion]").each(function(){ 
+              $(this).click(function(){
+                editRegion( $(this).prop('name') );
+              });
+           });
+         }
+      });
+    }
+
+    function loadRegions() {
+
+      loadEditRegions();
+      $.ajax({ url: "layers.html",
+        success: function(data) {
+            $('#layers').replaceWith( data );
+            $('.layersSubmenu').attr('hidden',$('#layers').attr('hidden'));
+            $('#showAllLayers').click(function(){ showAllLayers( true ); });
+            $('#showNoneLayers').click(function(){ showAllLayers( false ); });
+            $("[id^=showLayer]").each(function(){ 
+              $(this).click(function(){
+                showLayer( $(this).prop('id'), $(this).prop('checked') );
+              });
+           });
+         }
+      });
+      
+      enableRegions( false );
+    }
+
+    function createRegion( name ) {
+      $.ajax({ url: 'regions?create='+name,
+                success: function(data){
+                loadRegions();
+                hasRegionChanges=true;
+//                editRegion( name );
+             }
+      });
+    }
+
+    function showLayer( id, show ) {
+      var name = $('#'+id).prop('name');
+      $('#'+id).prop('checked',show);
+      $.ajax({ url: 'set?showLayer='+encodeURIComponent(name)+'&show='+show });
+      
+      loadEditRegions();
+    }
+
+    function showAllLayers( show ) {
+      $("[id^=showLayer]").each(function(){ 
+              showLayer( $(this).prop('id'), show );
+      });
+
+      loadEditRegions();
+    }
+
+    function editRegion( name ) {
+
+      isEditingRegions = false;
+
+      regionName = name;
+
+      $('#image').Jcrop({
+        allowSelect: false,
+        allowMove: true,
+        allowResize: true,
+        applyFilters: [ 'extent', 'ratio', 'round' ],
+        multi: false,
+        fixedSupport: true,
+        aspectRatio: 0,
+        onChange: selectionChanged,
+        onSelect: selectionChanged
+      });
+
+      $("[id^=useRegion]").each(function(){
+        if ( $(this).prop('name') == regionName )
+          $(this).prop('checked','checked');
+      });
+      
+      if ( name != "" )
+      { isEditingRegions = true;
+        hasRegionChanges = true;
+      }
+      window.setTimeout(function(){
+        var image;
+        image = $("#image");
+        $(image).css("width", "100%")
+        $(image).css("height", "100%")
+        $(image).css("display", "block")
+        $(image).removeAttr('style');
+        jcp = $('#image').Jcrop('api');
+        enableRegions( true );
+      }, 200);
+    }
+
+    function storeRegions() {
+      if ( jcp && isEditingRegions )
+      { var b = region;
+        b.y -= headerHeight;
+        $.ajax({ url: 'set?region='+encodeURIComponent(regionName)+'&x='+b.x+'&y='+b.y+'&w='+b.w+'&h='+b.h }); 
+      }
+    }
+
+    function setUIRegionShape( shape ) {
+      $('#regionShape').text("Shape: "+shape);
+    }
+
+    function updateRegions() {
+      if ( jcp && isEditingRegions )
+      {
+        $.ajax({ url: 'get?region='+encodeURIComponent(regionName),
+                success: function(data){
+                  region = data;
+                  jcp.setSelect( [ data.x, data.y+headerHeight, data.w, data.h ] );
+                  setUIRegionShape( data.shape );
+               }
+               }); 
+      }
+    }
+
+    function setRegionShape( shape ) {
+      if ( jcp && isEditingRegions )
+      { setUIRegionShape( shape );
+        hasRegionChanges = true;
+        $.ajax({ url: 'set?region='+encodeURIComponent(regionName)+'&shape='+shape }); 
+      }
+    }
+
+    function enableRegions( set ) {
+      if ( jcp && isEditingRegions ) {
+        isEditingRegions = false;
+        if ( set )
+        { jcp.deleteSelection();
+          jcp.newSelection();
+          isEditingRegions = true;
+          updateRegions();
+          setCameraControl(true); 
+          $("#doneRegions").attr("hidden",false);
+          $("#regionShape").attr("hidden",false);
+        }
+        else
+        {
+          jcp.deleteSelection();
+          $("#doneRegions").attr("hidden",true);
+          $("#regionShape").attr("hidden",true);
+        }
+        isEditingRegions = true;
+        hasRegionChanges = true;
+      }
+      else
+      { $("#doneRegions").attr("hidden",true);
+        $("#regionShape").attr("hidden",true);
+      }
+    }
+
+    function selectionChanged( b ) {
+      region = b;
+      storeRegions();
+    }
+
+    function pixelRatio() {
+      return window.devicePixelRatio;
+//      return (window.devicePixelRatio < 1 ? 1 : window.devicePixelRatio);
+    }
+
+    function resizeCanvas() {
+        bpCanvas = document.getElementById("canvas");
+        bpContext = bpCanvas.getContext("2d");
+
+      let dpi = pixelRatio();
+
+      bpCanvas.setAttribute('width',  dpi * window.screen.width);
+      bpCanvas.setAttribute('height', dpi * window.screen.height);
+    }
+
+    function updateBlueprints( sx, sy, tx, ty ) {
+
+      if ( !bpContext )
+        return;
+
+      let dpi = pixelRatio();
+      let scalex = dpi * window.screen.width;
+      let scaley = dpi * window.screen.height * blueprintImg.width / blueprintImg.height;
+
+      bpContext.setTransform(1, 0, 0, 1, 0, 0);
+      bpContext.clearRect(0, 0, bpCanvas.width, bpCanvas.height);
+
+      bpContext.setTransform( sx / scalex, 0, 0, sy / scaley, tx, ty );
+      bpContext.drawImage(blueprintImg, 0, 0, bpCanvas.width, bpCanvas.height)
+
+      if ( trackOcclImg.width > 0 )
+        bpContext.drawImage(trackOcclImg, 0, 0, bpCanvas.width, bpCanvas.height)
+    }
+
+
+    $( document ).ready(function() {
+      var dx, dy, ds;
+      var screenwidth = Math.max(window.screen.width, window.innerWidth);
+
+      document.title = "Lidar: " + window.location.hostname + ':' + window.location.port;
+      
+      window.onbeforeunload = function (e) {
+        if ( !hasEnvChanges && !hasRegionChanges && !hasRegistrationChanges )
+           return null
+        e = e || window.event;
+        if (e) {e.returnValue = 'Sure?';}
+        return 'Sure?';
+      };
+
+
+      $("#showDevInfo").prop('checked',screenwidth > 800);
+      $("#showObsvStat").prop('checked',screenwidth > 800);
+
+//      console.log( screenwidth );
+
+      hammertime = new Hammer( document.getElementById('image')  );
+      hammertime.get('pinch').set({ enable: true });
+
+      $('#image').on( 'load', function(){
+        if ( useBlueprints )
+          updateBlueprints( bsx, bsy, btx, bty );
+      });
+
+      reloadState();
+      reloadGroups();
+
+      setInterval(function () {
+
+        imageInProgress = false;
+
+        $.ajax({ url: "get?webId=true&frameTime=true&hasPlayPos=true&hasLidar=true&expertMode=true",
+            success: function(data){
+            if ( data.webId != webId )
+            { if ( webId != "" )
+              { reloadGroups();
+                reloadState();
+              }
+              webId      = data.webId;
+            }
+            if ( data.frameTime < updateFreq-10 || data.frameTime > updateFreq+2 )
+            { updateFreq = data.frameTime;
+              activateUpdate();
+            }
+            expertMode = data.expertMode;
+            hasLidar   = data.hasLidar;
+            hasPlayPos = data.hasPlayPos;
+            var hasPlayPosControls = (hasPlayPos && $('#showControls').prop("checked"));
+
+            $('#timeSlider').attr("hidden",!hasPlayPosControls);
+            $('#playPause').attr("hidden",!hasPlayPosControls);
+            
+            $('.hasLidar').attr('hidden',!hasLidar);
+            $('.hasNoLidar').attr('hidden',hasLidar);
+            if ( !hasLidar )
+              $(".movableDevices-item").remove();
+
+            if ( expertMode )
+              $('.noExpert').attr('hidden',true);
+            else
+              $('.expertMode').attr('hidden',true);
+          }
+        }); 
+
+      }, 1000);
+
+      $.ajax({ url: "title.html",
+        success: function(data){
+            $('#content').text(data); // update the HTML here
+        }
+      }); 
+
+      $('#createRegion').click(function(){
+         var name = prompt( "Enter Region Name:" );
+         if ( name != null && name != "" ) {
+            createRegion( name.split(' ').join('_') );
+         }
+      });
+     
+      $('#loadRegions').click(function(){
+         if ( confirm("Load Regions ?") == true) {
+            $.ajax({ url: 'loadRegions',
+                success: function(data){ hasRegionChanges=false; setCameraControl(true); loadRegions(); }
+            });
+         }
+      });
+     
+      $('#saveRegions').click(function(){
+         if ( confirm("Save Regions ?") == true) {
+            $.ajax({ url: 'saveRegions',
+                success: function(data){  
+                  hasRegionChanges = false;
+                  setCameraControl(true); 
+                  enableRegions( false );
+                }
+            });
+         }
+      });
+     
+      $('#regionShapeRectangle').click(function(){
+          setRegionShape( 'Rectangle' );
+      });
+     
+      $('#regionShapeEllipse').click(function(){
+          setRegionShape( 'Ellipse' );
+      });
+     
+      $('#doneRegions').click(function(){
+          enableRegions( false );
+          isEditingRegions = false;
+      });
+     
+      $('#saveBlueprint').click(function(){
+         if ( confirm("Save Blueprint ?") == true) {
+            $.ajax({ url: 'saveBlueprint',
+                success: function(data){ hasBlueprintChanges = false; setCameraControl(true); }
+            });
+         }
+      });
+     
+      $.ajax({ url: "displayOptions.html",
+        success: function(data){
+            $('#displayOptions').replaceWith( data );
+        }
+      });
+
+      $('#showBlueprint').change(function(){
+        showBlueprint( $(this).prop("checked") );
+      });
+     
+      $('#showObstacles').change(function(){
+        showObstacles( $(this).prop("checked") );
+      });
+     
+      $('#showControls').change(function(){
+        showBlueprint( $('#showBlueprint').prop("checked") );
+      });
+     
+      $('#showMenu').change(function(){
+        showMenu( $('#showMenu').prop("checked") );
+      });
+     
+      document.onkeyup = onKeyPress;
+      function onKeyPress(e)
+      {
+        var keycode = (window.event) ? event.keyCode : e.keyCode;
+
+        if ( (keycode == 33 || keycode == 34) && jcp && isEditingRegions )
+        {
+          var dir = (keycode == 33 ? "prev" : "next");
+          (window.event) ? window.event.preventDefault(): e.preventDefault();
+          $.ajax({ url: 'get?'+dir+'Region='+encodeURIComponent(regionName),
+            success: function(data){
+              editRegion( data.name );
+            }
+          }); 
+        }
+        else if ( keycode == 66 ) // B
+          $('#showBlueprint').click();
+        else if ( keycode == 67 ) // C
+          $('#showCoveragePoints').click();
+        else if ( keycode == 68 ) // D
+          $('#showDevLocation').click();
+        else if ( keycode == 69 ) // E
+          $('#showEnv').click();
+        else if ( keycode == 70 ) // F
+        {
+          $('#showControls').click();
+          var set = $('#showControls').prop("checked");
+          showMenu( set );
+        }
+        else if ( keycode == 71 ) // G
+          $('#showGrid').click();
+        else if ( keycode == 77 ) // M
+          $('#showMenu').click();
+        else if ( keycode == 73 ) // I
+          $('#showDevInfo').click();
+        else if ( keycode == 76 ) // L
+          $('#showLines').click();
+        else if ( keycode == 79 ) // O
+          $('#showObjects').click();
+        else if ( keycode == 80 ) // P
+          $('#showPoints').click();
+        else if ( keycode == 82 ) // R
+          $('#showRegions').click();
+        else if ( keycode == 83 ) // S
+          $('#showObsvStat').click();
+        else if ( keycode == 84 ) // T
+          $('#showTracking').click();
+      
+//      console.log( keycode );
+
+      }
+
+      $( "#image" ).on( "load", function( event ) {
+        imageInProgress = false;
+      });
+
+      $( "#image" ).on( "mousedown touchstart", function( event ) {
+        touchX = event.pageX;
+        touchY = event.pageY;
+        lastX  = touchX;
+        lastY  = touchY;
+        isDown = true;
+
+        enableRegions( false );
+      });
+
+      $( "#image" ).on( "mousemove touchmove", function( event ) {
+        var cmd;
+        if ( !isDown )
+          return;
+      
+        dx = event.pageX - lastX;
+        dy = event.pageY - lastY;
+        lastX = event.pageX;
+        lastY = event.pageY;
+
+        if ( isMoving )
+        {
+          moveX += dx;
+          moveY += dy;
+        }
+        else
+        {
+          cmd = 'dx='+(dx+moveX) + '&dy='+(dy+moveY);
+          moveX=0; moveY=0;
+
+          if ( event.altKey )
+          { var radius = event.pageX - $(this).prop('width') / 2;
+            var ctrl   = getControl(false);
+            $.ajax({ url: 'move?' + cmd + '&'+ ctrl + '&radius='+radius, success: function(data){ isMoving=false; markChangesByControl(false); }}); 
+          }
+          else
+          {
+            var ctrl   = getControl(!event.ctrlKey);
+            $.ajax({ url: 'move?' + cmd + '&'+ctrl,success: function(data){ isMoving=false; markChangesByControl(!event.ctrlKey); }});
+          }
+        }
+      });
+
+      $( "#image" ).on( "mouseup touchend touchcancel", function( event ) {
+        isDown = false;
+        enableRegions( true );
+        var ctrl   = getControl(!event.ctrlKey);
+        $.ajax({ url: 'move?isDown=false' + '&'+ ctrl}); 
+      });
+
+      document.addEventListener('contextmenu', event => event.preventDefault());
+
+      $('#scanEnv').click(function(){
+         if ( confirm("Scan Environment ?") == true) {
+            $.ajax({ url: 'scanEnv',
+                success: function(data){ hasEnvChanges=true; setCameraControl(true); } 
+            }); 
+         }
+      });
+     
+      $('#loadEnv').click(function(){
+         if ( confirm("Load Environment ?") == true) {
+            $.ajax({ url: 'loadEnv',
+                success: function(data){ hasEnvChanges=false; setCameraControl(true); }
+            });
+         }
+      });
+     
+      $('#saveEnv').click(function(){
+         if ( confirm("Save Environment ?") == true) {
+            $.ajax({ url: 'saveEnv',
+                success: function(data){ hasEnvChanges=false; setCameraControl(true); }
+            });
+         }
+      });
+     
+       $('#resetEnv').click(function(){
+         if ( confirm("Reset Environment ?") == true) {
+            $.ajax({ url: 'resetEnv',
+                success: function(data){ hasEnvChanges=false; setCameraControl(true); }
+            });
+         }
+      });
+     
+      $('#adaptEnv').click(function(){ 
+         var adaptEnv = $("#adaptEnv").prop('checked');
+         $.ajax({ url: 'set?adaptEnv='+adaptEnv });
+      });
+     
+      $('#useEnv').click(function(){ 
+         var useEnv = $("#useEnv").prop('checked');
+         $.ajax({ url: 'set?useEnv='+useEnv });
+      });
+     
+      $('#register').click(function(){
+         if ( confirm("Start Registration ?") == true) {
+            $.ajax({ url: 'register',
+                success: function(data){ hasRegistrationChanges=true; setCameraControl(true); }
+            }); 
+         }
+      });
+     
+      $('#refineRegistration').click(function(){
+         if ( confirm("Refine Registration ?") == true) {
+            $.ajax({ url: 'register?refine=true',
+                success: function(data){ setCameraControl(true); } 
+            });
+         }
+      });
+     
+      $('#loadRegistration').click(function(){
+         if ( confirm("Load Registration ?") == true) {
+            $.ajax({ url: 'loadRegistration',
+                success: function(data){ hasRegistrationChanges=false; setCameraControl(true); } 
+            });
+         }
+      });
+     
+      $('#saveRegistration').click(function(){
+         if ( confirm("Save Registration ?") == true) {
+            $.ajax({ url: 'saveRegistration',
+                success: function(data){ hasRegistrationChanges=false; setCameraControl(true); }
+            });
+         }
+      });
+     
+      $('#resetRegistration').click(function(){
+         if ( confirm("Reset Registration ?") == true) {
+            $.ajax({ url: 'resetRegistration',
+                success: function(data){ hasRegistrationChanges=true; setCameraControl(true); } 
+            });
+         }
+      });
+     
+      $('.reloadOcclusionMap').click(function(){
+         if ( confirm("Reload Occlusion Map ?") == true) {
+            $.ajax({ url: 'trackoccl?reload=true',
+                success: function(data){ trackOccImg.src = 'trackoccl?t=' + new Date().getTime(); } 
+            });
+         }
+      });
+     
+      $('.reloadBlueprint').click(function(){
+         if ( confirm("Reload Blueprint ?") == true) {
+            $.ajax({ url: 'blueprint?reload=true',
+                success: function(data){ hasBlueprintChanges = false; blueprintImg.src = 'blueprint?t=' + new Date().getTime(); } 
+            });
+         }
+      });
+     
+      $('#commitCheckpoint').click(function(){
+         if ( confirm("Commit Checkpoint ?") == true) {
+            $.ajax({ url: 'checkpoint?commit=current',
+                success: function(data){ window.alert( "Created checkpoint '" + data + "'" ); }
+            });
+         }
+      });
+     
+      $('#clearMessage').click(function(){
+            $.ajax({ url: 'clearMessage' });
+      });
+     
+      $('#start').click(function(){
+            $.ajax({ url: 'start',
+              success: function(data){
+                setRunDevices( true );
+              }
+         }); 
+      });
+     
+      $('#stop').click(function(){
+         $.ajax({ url: 'stop',
+              success: function(data){
+                setRunDevices( false );
+              }
+         }); // ajax
+      });
+     
+      $('#restart').click(function(){
+            $.ajax({ url: 'restart'}); 
+      });
+     
+      $('#groupAll').click(function(){
+        setAllGroups( true );
+      });
+
+      $('#groupNone').click(function(){
+        setAllGroups( false );
+      });
+
+      $('#runAll').click(function(){
+        setRunDevices( true );
+        runDevices();
+      });
+
+      $('#runNone').click(function(){
+        setRunDevices( false );
+        runDevices();
+      });
+
+      $('#camera').change(function(){
+        setCameraControl( $(this).prop('checked') );
+      });
+     
+      $('#blueprint').change(function(){
+        setBlueprintControl( $(this).prop('checked') );
+      });
+     
+      $('#obstacle').change(function(){
+        setObstacleControl( $(this).prop('checked') );
+      });
+     
+      $('#world').change(function(){
+         if ( $(this).prop('checked') )
+         {
+           updateControl( 'world' );
+         }
+         else
+           preventEmptyControl( this );
+      });
+     
+      $('#reset').click(function(){
+           $.ajax({ url: 'move?reset=true&'+getControl() }); 
+      });
+
+      $('#showAll').click(function(){
+           setShowDevices( true ); 
+      });
+
+      $('#showNone').click(function(){
+           setShowDevices( false ); 
+      });
+
+      var bpSliderRange = $('#bpSlider-range');
+      bpSliderRange.on('input', function(){ $('#canvas').css('opacity', this.value ); });
+
+      var timeSliderRange = $('#timeSlider-range');
+      timeSliderRange.on('input', function(){
+         $.ajax({ url: "set?playPos="+this.value }); 
+      });
+
+      $('#playPause-button').click(function(){ 
+         var paused = $("#playPause-button").prop('checked');
+         $.ajax({ url: 'set?paused='+paused });
+      });
+
+      window.onwheel = function (e) {
+//         e.preventDefault();
+//        if ( !imageInProgress )
+          $.ajax({ url: "changeExtent?dy="+ -e.deltaY/3.0,
+                  success: function(data){ updateRegions(); } 
+                 }); 
+      }
+      
+        hammertime.on('pinch pinchstart pinchend', function(event) {
+        if ( event.scale )
+        { 
+          if ( event.type == "pinchstart"  )
+          {
+            isDown = true;
+            lastScale = event.scale;
+          }
+          else
+          {
+            if ( event.type == "pinchend" )
+              isDown = false;
+            else
+            { 
+              ds = event.scale - lastScale;
+              lastScale = event.scale;
+              $.ajax({ url: "changeExtent?ds="+ds,
+                  success: function(data){ updateRegions(); } 
+                 }); 
+//              console.log( "changeExtent?ds="+ds );
+            }
+          }
+        }
+      });
+
+   }); // ready
+
+  </script>
+</head>
+<body>
+<!-- ============= COMPONENT ============== -->
+<nav class="navbar fixed-top navbar-expand-lg navbar-expand" id="myHeader">
+ <div class="container-fluid">
+  <div class="collapse navbar-collapse" id="main_nav">
+    <ul class="navbar-nav  dropdown-thin">
+      <li class="nav-item dropdown">
+	<button class="btn btn-primary dropdown-toggle me-1 hasLidar" type="button" id="actionButton" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
+	<ul class="dropdown-menu">
+	  <li><a class="dropdown-item" href="#" id="start">Start Devices</a></li>
+	  <li><a class="dropdown-item" href="#" id="stop">Stop Devices</a></li>
+	  <li><a class="dropdown-item" href="#">Run Device <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+	    <li><div class="dropdown-item">
+		<button class="btn" id="runAll">All</button>
+	      </div>
+	    </li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="runNone">None</button>
+	      </div>
+	    </li>
+	    <li><hr class="dropdown-divider"></li>
+            <div class="nav-item dropdown" id="runDevices">
+	      <li>   
+		<div class="dropdown-item">
+		  <input type="checkbox" class="form-check-input me-1" id="device0" checked="checked">
+		  <label class="custom-control-label" for="device0">Device 0</label>
+		</div>
+	      </li>
+	    </div>
+	    </ul>
+	  </li>
+	  <div class="dropdown-divider"></div>
+	  <li><a class="dropdown-item" href="#">Environment <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+	      <li><a class="dropdown-item" href="#" id="scanEnv">Scan Environment</a></li>
+	      <div class="dropdown-divider"></div>
+	      <li><a class="dropdown-item" href="#" id="loadEnv">Reload Environment</a></li>
+	      <li><a class="dropdown-item" href="#" id="saveEnv">Save Environment</a></li>
+	      <div class="dropdown-divider"></div>
+	      <li><a class="dropdown-item" href="#" id="resetEnv">Reset Environment</a></li>
+	      <div class="dropdown-divider"></div>
+	      <li>   
+	        <div class="dropdown-item">
+		  <input type="checkbox" class="form-check-input me-1" id="useEnv">
+		  <label class="custom-control-label" for="useEnv">Use Environment</label>
+		</div>
+	      </li>
+	      <li class="expertMode">   
+		<div class="dropdown-item">
+		  <input type="checkbox" class="form-check-input me-1" id="adaptEnv">
+		  <label class="custom-control-label" for="adaptEnv">Adapt Environment</label>
+		</div>
+	      </li>
+	    </ul>
+	  </li>
+	  <div class="dropdown-divider"></div>
+	  <li><a class="dropdown-item" href="#">History <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+		<li><a class="dropdown-item" href="#" id="commitCheckpoint">Commit Checkpoint</a></li>
+	    </ul>
+	  </li>
+	  <div class="dropdown-divider"></div>
+	  <li><a class="dropdown-item" href="#">Reboot Node <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+	    <li class="hasRemote"><div class="dropdown-item">
+		<button class="btn" id="rebootAll">All Remote</button>
+	      </div>
+	    </li>
+	    <li class="hasRemote"><hr class="dropdown-divider"></li>
+            <div class="nav-item dropdown" id="rebootNodes">
+	      <li>   
+		<div class="dropdown-item">
+		</div>
+	      </li>
+	    </div>
+	    <li><hr class="dropdown-divider hasRemote"></li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="rebootThis">This</button>
+	      </div>
+	    </li>
+	    </ul>
+	  </li>
+	</ul>  <!-- dropdown-menu.// -->
+      </li> <!-- dropdown.// -->
+     </ul>
+      &nbsp;&nbsp;
+     <ul class="navbar-nav dropdown-thin">
+      <li class="nav-item dropdown">
+	<button class="btn btn-secondary dropdown-toggle me-1" type="button" id="regionsButton" data-bs-toggle="dropdown" aria-expanded="false">Regions</button>
+	<ul class="dropdown-menu">
+	  <li><a class="dropdown-item" href="#" id="createRegion">Create Region</a></li>
+	  <div class="dropdown-divider"></div>
+	  <li><a class="dropdown-item" href="#">Edit Regions <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+		<div id="editRegs"></div>
+	    </ul>
+	  </li>
+	  <div class="dropdown-divider layersSubmenu"></div>
+	  <li class="layersSubmenu"><a class="dropdown-item" href="#">Layers <div class="raquo">&raquo;</div></a>
+	    <ul class="submenu dropdown-menu">
+		<li id="layers">   
+		</li>
+	    </ul>
+	  </li>
+	  <div class="dropdown-divider"></div>
+	  <li><a class="dropdown-item" href="#" id="loadRegions">Reload Regions</a></li>
+	  <li><a class="dropdown-item" href="#" id="saveRegions">Save Regions</a></li>
+	</ul>  <!-- dropdown-menu.// -->
+      </li> <!-- dropdown.// -->
+
+      </ul>
+      &nbsp;&nbsp;
+ 
+     <span class="hasGroups"><ul class="navbar-nav dropdown-thin">
+       <li class="nav-item dropdown">
+	  <button class="btn btn-warning dropdown-toggle hasLidar" type="button" id="groups" data-bs-toggle="dropdown" aria-expanded="false" hidden="true">Groups</button>
+	  <ul class="dropdown-menu dropdown-menu-end">
+	    <li><div class="dropdown-item">
+		<button class="btn" id="groupAll">All</button>
+	      </div>
+	    </li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="groupNone">None</button>
+	      </div>
+	    </li>
+	    <li><hr class="dropdown-divider"></li>
+	    <li id="availableGroups">   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="group0" checked="checked">
+		<label class="custom-control-label" for="group0">Group 0</label>
+	      </div>
+	    </li>
+	  </ul>  <!-- dropdown-menu.// -->
+        </li> <!-- dropdown.// -->
+     </ul></span>
+    <span id="content" class="navbar-text">Unknown Host</span>
+     <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+	  <button class="btn btn-success dropdown-toggle me-1" type="button" id="cameraWorldControl" data-bs-toggle="dropdown" aria-expanded="false">Camera</button>
+	  <ul class="dropdown-menu dropdown-menu">
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" name="camera" id="camera" checked="checked">
+		<label class="custom-control-label" for="camera">Camera</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1 hasLidar" name="world" id="world">
+		<label class="custom-control-label" for="world">Devices</label>
+	      </div>
+	    </li>
+	    <li id="blueprint_ctl">   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" name="blueprint" id="blueprint">
+		<label class="custom-control-label" for="blueprint">Blueprint</label>
+	      </div>
+	    </li>
+	    <li id="obstacle_ctl">   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" name="obstacle" id="obstacle">
+		<label class="custom-control-label" for="obstacle">Obstacle</label>
+	      </div>
+	    </li>
+
+	    <div class="hasLidar">
+
+	    <li><hr class="dropdown-divider hasLidar"></li>
+	    <li id="movableDevices" class="hasLidar"/>   
+	    <li><hr class="dropdown-divider hasLidar"></li>
+	    <li><div class="dropdown-item hasLidar">
+		<button class="btn" id="reset">Reset</button>
+	      </div>
+	    </li>
+	    <li><hr class="dropdown-divider hasLidar"></li>
+
+	    <li><div class="dropdown-item hasLidar">
+		<button class="btn" id="loadRegistration">Reload Registration</button>
+	      </div>
+	    </li>
+	    <li><div class="dropdown-item hasLidar">
+		<button class="btn" id="saveRegistration">Save Registration</button>
+	      </div>
+	    </li>
+
+	    <div class="expertMode">
+
+	    <li><hr class="dropdown-divider"></li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="register">Start Registration</button>
+	      </div>
+	    </li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="refineRegistration">Refine Registration</button>
+	      </div>
+	    </li>
+	    <li><hr class="dropdown-divider"></li>
+	    <li><div class="dropdown-item">
+		<button class="btn" id="clearMessage">Clear Message</button>
+	      </div>
+	    </li>
+          </div>  <!-- expertMode.// -->
+          </div>  <!--hasLidar .// -->
+	  </ul>  <!-- dropdown-menu.// -->
+        </li> <!-- dropdown.// -->
+        <li class="nav-item dropdown">
+	  <button class="btn btn-light dropdown-toggle me-1" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">Display</button>
+	  <ul class="dropdown-menu dropdown-menu-end dropleft">
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showPoints" checked="checked">
+		<label class="custom-control-label" for="showPoints"><u>P</u>oints</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showLines">
+		<label class="custom-control-label" for="showLines"><u>L</u>ines</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showOutline">
+		<label class="custom-control-label" for="showOutline">Outline</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showCoverage">
+		<label class="custom-control-label" for="showCoverage">Coverage</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showObjects" checked="checked">
+		<label class="custom-control-label" for="showObjects"><u>O</u>bjects</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showEnv">
+		<label class="custom-control-label" for="showEnv"><u>E</u>nvironment</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showEnvThres" checked="checked">
+		<label class="custom-control-label" for="showEnvThres">Environment Thres</label>
+	      </div>
+	    </li>
+	    <li>
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showTracking" checked="checked">
+		<label class="custom-control-label" for="showTracking"><u>T</u>racking</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showRegions" checked="checked">
+		<label class="custom-control-label" for="showRegions"><u>R</u>egions</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showDevInfo">
+		<label class="custom-control-label" for="showDevInfo">Device <u>I</u>nfo</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showDevLocation" checked="checked">
+		<label class="custom-control-label" for="showDevLocation"><u>D</u>evice Location</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showObsvStat">
+		<label class="custom-control-label" for="showObsvStat">Observer <u>S</u>tatus</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showGrid" checked="checked">
+		<label class="custom-control-label" for="showGrid"><u>G</u>rid</label>
+	      </div>
+	    </li>
+	    <li id="displayObstacle">   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showObstacles" checked="checked">
+		<label class="custom-control-label" for="showObstacles">Obstacles</label>
+	      </div>
+	    </li>
+	    <li class="hasBlueprints" id="displayBlueprint">   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showBlueprint" checked="checked">
+		<label class="custom-control-label" for="showBlueprint"><u>B</u>lueprint</label>
+	      </div>
+	    </li>
+	    <div class="dropdown-divider noExpert hasBlueprints"></div>
+            <li><a class="dropdown-item reloadBlueprint noExpert hasBlueprints" href="#">Reload Blueprint</a></li>
+            <li><a class="dropdown-item reloadOcclusionMap noExpert hasOcclusion" href="#">Reload Occlusion Map</a></li>
+	    <li id="displayOptions">   
+	    </li>
+	    <li><a class="dropdown-item hasLidar expertMode" href="#"><div class="laquo">&laquo;</div> &nbsp; &nbsp; More </a>
+	      <ul class="submenu-left dropdown-menu">
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showObjCircle">
+		<label class="custom-control-label" for="showObjCircle">Object Circles</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showCurvature">
+		<label class="custom-control-label" for="showCurvature">Object Curvature</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showSplitProb">
+		<label class="custom-control-label" for="showSplitProb">Object Split Propability</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showConfidence">
+		<label class="custom-control-label" for="showConfidence">Object Confidence</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showLifeSpan">
+		<label class="custom-control-label" for="showLifeSpan">Life Span</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showMotion" checked="checked">
+		<label class="custom-control-label" for="showMotion">Motion</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showMotionPred">
+		<label class="custom-control-label" for="showMotionPred">Motion Prediction</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showStages">
+		<label class="custom-control-label" for="showStages">Stages</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showMarker">
+		<label class="custom-control-label" for="showMarker">Marker</label>
+	      </div>
+	    </li>
+	    <li id="displayCoveragePoints">
+	      <div class="dropdown-item hasLidar">
+		<input type="checkbox" class="form-check-input me-1" id="showCoveragePoints">
+		<label class="custom-control-label" for="showCoveragePoints"><u>C</u>overage Points</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showPrivate" checked="true">
+		<label class="custom-control-label" for="showPrivate">Private Trackables</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showControls" checked="true">
+		<label class="custom-control-label" for="showControls">Controls</label>
+	      </div>
+	    </li>
+	    <li>   
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="showMenu" checked="true">
+		<label class="custom-control-label" for="showMenu"><u>M</u>enu</label>
+	      </div>
+	    </li>
+	        <div class="dropdown-divider hasBlueprints"></div>
+		<li><a class="dropdown-item reloadBlueprint hasBlueprints" href="#">Reload Blueprint</a></li>
+		<li><a class="dropdown-item reloadOcclusionMap hasOcclusion" href="#">Reload Occlusion Map</a></li>
+	      </ul>
+	    </li>
+	  </ul>  <!-- dropdown-menu.// -->
+        </li> <!-- dropdown.// -->
+        <li class="nav-item dropdown">
+	  <button class="btn btn-secondary dropdown-toggle hasLidar" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">Show</button>
+	  <ul class="dropdown-menu dropdown-menu-end dropleft">
+	    <li><div class="dropdown-item">
+		<button class="btn" id="showAll">All</button>
+	      </div>
+	    </li>
+	    <li>   
+		<div class="dropdown-item">
+		<button class="btn" id="showNone">None</button>
+	      </div>
+	    </li>
+	    <li><hr class="dropdown-divider"></li>
+	    <li id="visibleDevices">
+	      <div class="dropdown-item">
+		<input type="checkbox" class="form-check-input me-1" id="device0" checked="checked">
+		<label class="custom-control-label" for="device0">Device 0</label>
+	      </div>
+	    </li>
+	  </ul>  <!-- dropdown-menu.// -->
+        </li> <!-- dropdown.// -->
+      </ul>
+    </div> <!-- navbar-collapse.// -->
+  </div> <!-- container-fluid.// -->
+</nav>
+
+  <div id="bpSlider" hidden="true">
+    <input id="bpSlider-range" orient="vertical" type="range" step="0.01" value="0.5" min="0" max="1">
+    <span class="range-value"></span>
+  </div>
+
+  <div id="timeSlider" hidden="true">
+    <input id="timeSlider-range" orient="horizontal" type="range" step="0.0003" value="0.0" min="0" max="1">
+    <span class="range-value"></span>
+  </div>
+
+  <div id="playPause">
+     <input type="checkbox" class="faChk" id="playPause-button" >
+  </div>
+
+  <div id="body" class="d-flex justify-content-left">
+	<img id="image" src="image" draggable="false">
+  </div>
+  <button class="btn btn-primary bottom-right" type="button" id="doneRegions" hidden="false">
+    Done Regions
+  </button>
+  <button class="btn btn-primary bottom-right" type="button" id="saveBlueprint" hidden="false">
+    Save Blueprint
+  </button>
+  <button class="btn btn-primary top-right dropdown-toggle me-1" type="button" id="regionShape" data-bs-toggle="dropdown" aria-expanded="false">
+      Region Shape
+  </button>
+  <ul class="dropdown-menu">
+      <li><a class="dropdown-item" href="#" id="regionShapeRectangle">Rectangle</a></li>
+      <li><a class="dropdown-item" href="#" id="regionShapeEllipse">Ellipse</a></li>
+  </ul>
+  <canvas id="canvas" hidden="true">
+
+</body>
+</html>
+

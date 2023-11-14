@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Script to check Configuration update of Lidar
+Requires=tmp-usbstick.mount
+After=tmp-usbstick.mount
+
+[Service]
+ExecStart=pathToConfigDir/install/usbStickPlugged.sh mount USER
+
+[Install]
+WantedBy=tmp-usbstick.mount
+

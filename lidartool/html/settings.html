@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2023 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html lang="en">
+<head>
+  <title>Lidar Settings</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<style>
+
+html, body {
+    width: calc(100%);
+    height: calc(100%);
+    margin: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+pre {
+  background-color: #ffffff;
+  border:0px 
+}
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bigDot {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  display: inline-block;
+  position:relative;
+  top:12px;
+}
+
+.ok {
+  background-color: #00af00;
+}
+
+.warning {
+  background-color: #dfdf00;
+}
+
+.error {
+  background-color: #af0000;
+}
+
+</style>
+
+<body>
+
+<div class="container">
+      <p>
+      <p>
+      <hr>
+      <h4><span id="titleText"></span></h4>
+      <hr>
+      <b><span id="conf"></span></b>
+      <hr>
+      <p>
+      <p>
+
+      <div class="isHardwarePower">
+	<input type="checkbox" class="form-check-input me-1" id="sensorPowerEnabled" checked="checked">
+	<label class="custom-control-label" for="camera">Has Sensor Power Control</label>
+      </div>
+      <p>
+      <p>
+      <div class="hasSensorIN">
+	<span><b> Sensor Identification Number (SIN):</b></span><p>
+	<div class="form-outline" id="editSensorIN">
+	  <textarea class="form-control textedit" id="sensorIN" rows="3"></textarea>
+	</div></p></p>
+	<button class="btn btn-success btn-sm me-1" type="button" id="saveEditSensorIN">
+	  Save
+	</button>
+      </div>
+</div>
+
+<script>
+var lastSensorIN = "";
+
+function updateSensorIN()
+{
+      $.ajax({ url: "sensorIN",
+          success: function(data){
+              $('#sensorIN')[0].value = data;
+              lastSensorIN = $('#sensorIN')[0].value;
+          },
+          error: function (request, status, error) {
+              $('#sensorIN')[0].value = "";
+              lastSensorIN = $('#sensorIN')[0].value;
+          }
+      });
+}
+
+$(document).ready(function(){
+
+      $.ajax({ url: "title.html",
+        success: function(data){
+            $('#titleText').text(data);
+        }
+      }); 
+
+      $.ajax({ url: "get?conf=true&hasSensorIN=true&sensorPowerEnabled=true",
+        success: function(data){
+            $('#conf').text( "Config: "+data.conf);
+            $("#sensorPowerEnabled").prop('checked',data.sensorPowerEnabled);
+//            $('.hasSensorIN').attr('hidden',!data.hasSensorIN );
+        }
+      }); 
+
+      updateSensorIN();
+            
+      $("#sensorPowerEnabled").click(function(){
+        $.ajax({ url: "set?sensorPowerEnabled="+$(this).prop('checked'),
+          error: function(data){
+            $(this).prop('checked',!$(this).prop('checked'));
+          }
+        }); 
+        
+      });
+
+      $("#saveEditSensorIN").click(function(){
+
+          var data = $('#sensorIN')[0].value;
+
+          if ( lastSensorIN == data )
+            return;
+
+          var formData = new FormData();
+          formData.append("sensorIN", data );
+          $.ajax({
+            type: "POST",
+            contentType: false,
+            processData: false,
+            url: "sensorIN",
+            data: formData
+          });
+      });
+
+      var interval = setInterval(function () {
+      
+      }, 1500 );
+
+});
+</script>
+
+</body>
+</html>

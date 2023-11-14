@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2022 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html lang="en">
+<head>
+  <title>Lidar Admin page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<style>
+
+html, body {
+    width: calc(100%);
+    height: calc(100%);
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+</style>
+
+<body>
+
+<div class="container">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#home">Home</a></li>
+    <li><a href="#menu1">Tab 1</a></li>
+    <li><a href="#menu2">Tab 2</a></li>
+    <li><a href="#menu3">Tab 3</a></li>
+  </ul>
+
+  <div class="tab-content">
+	<p><p>
+    <div id="home" class="tab-pane fade in active">
+	  <button class="btn bottom-right" type="button" id="startStop" hidden="true">
+	    Initializing
+	  </button>
+	  <p><p>
+	  <div id="deviceList">
+	  </div>
+   </div>
+    <div id="menu1" class="tab-pane fade">
+      <h3>Tab 1</h3>
+    </div>
+    <div id="menu2" class="tab-pane fade">
+      <h3>Tab 2</h3>
+    </div>
+    <div id="menu3" class="tab-pane fade">
+      <h3>Tab 3</h3>
+    </div>
+	</p></p>
+  </div>
+</div>
+
+<script>
+$(document).ready(function(){
+      $(".nav-tabs a").click(function(){
+      $(this).tab('show');
+      });
+
+      var interval = setInterval(function () {
+      
+      if ( $("#home").hasClass( "active" ) )
+      {
+//console.log( "Home" );
+        $.ajax({ url: "get?isStarted=true",
+            success: function(data){
+            if ( data.isStarted )
+            {
+               $('#startStop').text("Stop");
+               $('#startStop').addClass( "btn-danger" );
+               $('#startStop').removeClass( "btn-success" );
+            }
+            else
+            {
+               $('#startStop').text("Start");
+               $('#startStop').removeClass( "btn-danger" );
+               $('#startStop').addClass( "btn-success" );
+            }
+
+        }});
+
+        $.ajax({ url: "deviceList",
+           success: function(data){
+               $('#deviceList').html(data);
+           },
+           error: function (request, status, error) {
+               $('#deviceList').html( "Application not running");
+        }});
+      
+        }
+      }, 1000 );
+
+      $("#startStop").click(function(){
+        var cmd = "stop";
+        if ( $(this).text() == "Start" )
+          cmd = "start";
+        $.ajax({ url: cmd });
+      });
+
+});
+</script>
+
+</body>
+</html>

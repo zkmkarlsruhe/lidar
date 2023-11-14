@@ -1,0 +1,154 @@
+diff --git a/CImg.h b/CImg.h
+index 01e2ee7..67ee173 100644
+--- a/CImg.h
++++ b/CImg.h
+@@ -47466,6 +47466,48 @@ namespace cimg_library {
+       return *this;
+     }
+ 
++#define cimg_draw_scanline_op(x0,x1,y,color,op) \
++    _draw_scanline_op(x0,x1,y,color,op,_sc_whd)
++
++    // [internal] The following _draw_scanline() routines are *non user-friendly functions*,
++    // used only for internal purpose.
++    // Pre-requisites: x0<=x1, y-coordinate is valid, col is valid.
++    template<typename tc>
++    CImg<T>& _draw_scanline_op(const int x0, const int x1, const int y,
++                            const tc *const color, int op,
++                            const ulongT whd) {
++      const int nx0 = x0>0?x0:0, nx1 = x1<width()?x1:width() - 1, dx = nx1 - nx0;
++      if (dx>=0) {
++        const tc *col = color;
++        const ulongT off = whd - dx - 1;
++        T *ptrd = data(nx0,y);
++	 
++	if( op == 1 ) {
++	  cimg_forC(*this,c) {
++	    const Tfloat val = *(col++);
++	    for (int x = dx; x>=0; --x) { *ptrd = (T)(val + *ptrd); ++ptrd; }
++	    ptrd+=off;
++	  }
++	}
++	else if( op == 2 ) {
++	  cimg_forC(*this,c) {
++	    const Tfloat val = *(col++);
++	    for (int x = dx; x>=0; --x) { *ptrd = (T)(val > *ptrd ? val : *ptrd); ++ptrd; }
++	    ptrd+=off;
++	  }
++	}
++	else {
++	  cimg_forC(*this,c) {
++	    const Tfloat val = *(col++);
++	    for (int x = dx; x>=0; --x) { *ptrd = (T)val; ++ptrd; }
++	    ptrd+=off;
++	  }
++        }
++      }
++
++      return *this;
++    }
++
+     //! Draw a 3D point.
+     /**
+        \param x0 X-coordinate of the point.
+@@ -47596,6 +47638,50 @@ namespace cimg_library {
+       return *this;
+     }
+ 
++    template<typename tc>
++    CImg<T>& draw_line_op(int x0, int y0,
++			  int x1, int y1,
++			  const tc *const color, int op=0, unsigned short mask=0xffff)
++   {
++     if (is_empty() ||
++	 std::min(y0,y1)>=height() || std::max(y0,y1)<0 ||
++	 std::min(x0,x1)>=width() || std::max(x0,x1)<0)
++       return *this;
++  
++     int w1 = width() - 1, h1 = height() - 1, dx01 = x1 - x0, dy01 = y1 - y0;
++
++     const bool is_horizontal = cimg::abs(dx01)>cimg::abs(dy01);
++     if (is_horizontal) cimg::swap(x0,y0,x1,y1,w1,h1,dx01,dy01);
++     if (y0>y1) {
++       cimg::swap(x0,x1,y0,y1);
++       dx01*=-1; dy01*=-1;
++     }
++
++     cimg_init_scanline(1);
++     const int step = y0<=y1?1:-1,hdy01 = dy01*cimg::sign(dx01)/2,
++                cy0 = cimg::cut(y0,0,h1), cy1 = cimg::cut(y1,0,h1) + step;
++     dy01+=dy01?0:1;
++
++     for (int y = cy0; y!=cy1; y+=step) {
++       const int
++	 yy0 = y - y0,
++	 x = x0 + (dx01*yy0 + hdy01)/dy01;
++       if (x>=0 && x<=w1) {
++	 T *const ptrd = is_horizontal?data(y,x):data(x,y);
++	 cimg_forC(*this,c) {
++	   if ( mask&(1<<c) ) {
++	     const T val = color[c];
++	     if( op )
++	       ptrd[c*_sc_whd] += val;
++	     else
++	       ptrd[c*_sc_whd] = val;
++	   }
++	 }
++       }
++     }
++     return *this;
++   }
++
+     //! Draw a 2D line, with z-buffering.
+     /**
+        \param zbuffer Zbuffer image.
+@@ -50252,6 +50338,49 @@ namespace cimg_library {
+       return *this;
+     }
+ 
++
++
++    //! Draw a filled 2D circle with operation.
++    /**
++       \param x0 X-coordinate of the circle center.
++       \param y0 Y-coordinate of the circle center.
++       \param radius  Circle radius.
++       \param color Pointer to \c spectrum() consecutive values, defining the drawing color.
++       \param opacity Drawing opacity.
++       \note
++       - Circle version of the Bresenham's algorithm is used.
++    **/
++    template<typename tc>
++    CImg<T>& draw_circle_op(const int x0, const int y0, int radius,
++                         const tc *const color, int op=0) {
++      
++      if (is_empty()) return *this;
++      if (radius<0 || x0 - radius>=width() || y0 + radius<0 || y0 - radius>=height()) return *this;
++      if (!color)
++        throw CImgArgumentException(_cimg_instance
++                                    "draw_circle(): Specified color is (null).",
++                                    cimg_instance);
++      if (!radius) return draw_point(x0,y0,color,1);
++      cimg_init_scanline(1);
++      if (y0>=0 && y0<height()) cimg_draw_scanline_op(x0 - radius,x0 + radius,y0,color,op);
++      for (int f = 1 - radius, ddFx = 0, ddFy = -(radius<<1), x = 0, y = radius; x<y; ) {
++        if (f>=0) {
++          const int x1 = x0 - x, x2 = x0 + x, y1 = y0 - y, y2 = y0 + y;
++          if (y1>=0 && y1<height()) cimg_draw_scanline_op(x1,x2,y1,color,op);
++          if (y2>=0 && y2<height()) cimg_draw_scanline_op(x1,x2,y2,color,op);
++          f+=(ddFy+=2); --y;
++        }
++        const bool no_diag = y!=(x++);
++        ++(f+=(ddFx+=2));
++        const int x1 = x0 - y, x2 = x0 + y, y1 = y0 - x, y2 = y0 + x;
++        if (no_diag) {
++          if (y1>=0 && y1<height()) cimg_draw_scanline_op(x1,x2,y1,color,op);
++          if (y2>=0 && y2<height()) cimg_draw_scanline_op(x1,x2,y2,color,op);
++        }
++      }
++      return *this;
++    }
++
+     //! Draw an image.
+     /**
+        \param sprite Sprite image.

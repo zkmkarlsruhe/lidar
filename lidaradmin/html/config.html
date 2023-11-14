@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+// Copyright (c) 2023 ZKM | Hertz-Lab (http://www.zkm.de)
+// Bernd Lintermann <bernd.lintermann@zkm.de>
+//
+// BSD Simplified License.
+// For information on usage and redistribution, and for a DISCLAIMER OF ALL
+// WARRANTIES, see the file, "LICENSE" in this distribution.
+//   
+-->
+
+<html lang="en">
+<head>
+  <title>Lidar Central</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<style>
+
+html, body {
+    width: calc(100%);
+    height: calc(100%);
+    margin: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+pre {
+  background-color: #ffffff;
+  border:0px 
+}
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.btn-list { height: 3vh;
+      height: 18px;
+      padding:.15rem .75rem;
+      font-size:0.95rem;
+      border-radius:.1.5rem
+}
+
+.action-item { font-size:0.95rem;
+}
+
+.t-nl {
+   padding-left:  5px;
+   padding-right:  5px;
+   padding-top:   1px;
+   padding-bottom:   1px;
+}
+
+.t-fs {
+   padding-left:  10px;
+   padding-right: 10px;
+   padding-top:   1px;
+   padding-bottom:   1px;
+   font-size: 13px; /* Set a font-size */
+}
+
+table {
+  border-spacing: 1px;
+}
+
+.buttonload {
+  background-color: #04AA6D; /* Green background */
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 12px 24px; /* Some padding */
+  font-size: 16px; /* Set a font-size */
+}
+
+/* Add a right margin to each icon */
+.fa {
+  margin-left: -2px;
+  margin-right: 8px;
+}
+
+</style>
+
+<body>
+<p>
+<div class="container">
+      <div id="nodeList">
+      </div>
+</div>
+</p>
+
+<script>
+
+var nodesBuisy = false;
+var lastNodeList = "";
+
+$(document).ready(function(){
+
+      var interval = setInterval(function () {
+      
+        if ( !nodesBuisy )
+        {
+          nodesBuisy = true;
+
+          $.ajax({ url: "nodeList",
+             success: function(data){
+
+              if ( lastNodeList != data && window.getSelection() == "" )
+              {
+                 lastNodeList = data;
+                 $('#nodeList').html(data);
+                 $(".btn-lidarTool").click(function(){
+                    window.open( "http://"+$(this).prop('id'), $(this).prop('id') );
+                 });
+
+               }
+
+               nodesBuisy = false;  
+             },
+             error: function (request, status, error) {
+                 $('#nodeList').html( "Server not running");
+                 nodesBuisy = false;  
+             }
+          });
+       }
+     }, 1000 );
+
+});
+</script>
+
+</body>
+</html>

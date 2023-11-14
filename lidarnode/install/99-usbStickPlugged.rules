@@ -1,0 +1,4 @@
+KERNEL=="sd?1", SUBSYSTEMS=="usb", ACTION=="add", RUN+="/usr/bin/mkdir -p /tmp/usbstick", RUN+="/usr/bin/systemd-mount --no-block --automount=no --collect $devnode /tmp/usbstick"
+
+
+

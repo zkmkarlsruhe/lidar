@@ -1,0 +1,523 @@
+diff --git a/core/base/thread.h b/core/base/thread.h
+index 5f6d7bb..2e40e27 100644
+--- a/core/base/thread.h
++++ b/core/base/thread.h
+@@ -133,22 +133,21 @@ namespace ydlidar
+           {
+             // return s;
+           }
+-          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d]\n", _handle, s);
++//          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d]\n", _handle, s);
+           s = pthread_join((pthread_t)(_handle), NULL);
+-          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d] time[%u]\n",
+-            _handle, s, getms() - t);
++//          printf("[YDLIDAR DEBUG] Thread [0x%X] ready to cancel[%d] time[%u]\n", _handle, s, getms() - t);
+           if (ESRCH == s)
+           {
+-            printf("[YDLIDAR] Thread [0x%X] has been canceled in other thread\n", _handle);
++//            printf("[YDLIDAR] Thread [0x%X] has been canceled in other thread\n", _handle);
+             return s;
+           }
+           if (s != 0)
+           {
+-            fprintf(stderr, "[YDLIDAR] An error occurred while thread[0x%X] cancelled!\n", _handle);
++            fprintf(stderr, "[YDLIDAR] An error occurred while thread[0x%lX] cancelled!\n", _handle);
+             return s;
+           }
+ 
+-          printf("[YDLIDAR] Thread [0x%X] has been canceled\n", _handle);
++//          printf("[YDLIDAR] Thread [0x%X] has been canceled\n", _handle);
+           _handle = 0;
+ #endif
+           return 0;
+diff --git a/core/common/DriverInterface.h b/core/common/DriverInterface.h
+index 38072ef..5f985f8 100644
+--- a/core/common/DriverInterface.h
++++ b/core/common/DriverInterface.h
+@@ -149,6 +149,14 @@ class DriverInterface {
+    */
+   virtual result_t connect(const char *port_path, uint32_t baudrate = 8000) = 0;
+ 
++  /**
++   * @brief Tries to open a device with a given specification,
++   * @return true if successful, otherwise false.
++   */
++
++  virtual bool pingDeviceInfo( const char *port_path, int &model, int &firmware_version, int &hardware_version, uint8_t serialnum[16], int defaultBaudrate )
++  { return false; }
++
+   /**
+    * @brief Returns a human-readable description of the given error code
+    *  or the last error code of a socket or serial port
+diff --git a/src/CYdLidar.cpp b/src/CYdLidar.cpp
+index 09022fc..a24bb3e 100644
+--- a/src/CYdLidar.cpp
++++ b/src/CYdLidar.cpp
+@@ -89,6 +89,8 @@ CYdLidar::CYdLidar() : lidarPtr(nullptr)
+   m_field_of_view = 360.f;
+   memset(&m_LidarVersion, 0, sizeof(LidarVersion));
+   zero_offset_angle_scale = 4.f;
++  verbose		  = true;
++  trying		  = false;
+ }
+ 
+ /*-------------------------------------------------------------
+@@ -420,28 +422,91 @@ bool CYdLidar::initialize()
+ {
+   uint32_t t = getms();
+   if (!checkCOMMs())
+-  {
+-    fprintf(stderr,
+-            "[YDLIDAR] Error initializing YDLIDAR check Comms.\n");
+-    fflush(stderr);
++  { if ( !trying ) {
++      fprintf(stderr,
++	      "[YDLIDAR] Error initializing YDLIDAR check Comms.\n");
++      fflush(stderr);
++    }
+     return false;
+   }
+ 
+   if (!checkStatus())
+   {
+-    fprintf(stderr,
+-            "[YDLIDAR] Error initializing YDLIDAR check status under [%s] and [%d].\n",
+-            m_SerialPort.c_str(), m_SerialBaudrate);
+-    fflush(stderr);
++    if ( !trying ) {
++      fprintf(stderr,
++	      "[YDLIDAR] Error initializing YDLIDAR check status under [%s] and [%d].\n",
++	      m_SerialPort.c_str(), m_SerialBaudrate);
++      fflush(stderr);
++    }
+     return false;
+   }
+ 
+-  printf("[YDLIDAR] Lidar init success, Elapsed time %u ms\n", getms() - t);
++  if ( verbose )
++    printf("[YDLIDAR] Lidar init success, Elapsed time %u ms\n", getms() - t);
+   fflush(stdout);
+ 
+   return true;
+ }
+ 
++/*-------------------------------------------------------------
++                        pingDeviceInfo
++-------------------------------------------------------------*/
++bool CYdLidar::pingDeviceInfo( int &model, int &firmware_version, int &hardware_version, uint8_t serialnum[16] )
++{
++  if (!lidarPtr) {
++    // create the driver instance
++    if (isNetTOFLidar(m_LidarType)) {
++      lidarPtr = new ydlidar::ETLidarDriver();//T15
++    } else {//TG30 G4
++      lidarPtr = new ydlidar::YDlidarDriver(m_DeviceType);
++    }
++
++    if (!lidarPtr) {
++      return false;
++    }
++  }
++
++  // Is it COMX, X>4? ->  "\\.\COMX"
++  if (m_SerialPort.size() >= 3) {
++    if (tolower(m_SerialPort[0]) == 'c' && tolower(m_SerialPort[1]) == 'o' &&
++        tolower(m_SerialPort[2]) == 'm') {
++      // Need to add "\\.\"?
++      if (m_SerialPort.size() > 4 || m_SerialPort[3] > '4') {
++        m_SerialPort = std::string("\\\\.\\") + m_SerialPort;
++      }
++    }
++  }
++
++  // make connection...
++
++  if ( !lidarPtr->pingDeviceInfo( m_SerialPort.c_str(), model, firmware_version, hardware_version, serialnum, m_SerialBaudrate) )
++    return false;
++
++  lidarPtr->setSingleChannel(m_SingleChannel);
++  lidarPtr->setLidarType(m_LidarType);
++
++  device_info devinfo;
++  result_t op_result = lidarPtr->getDeviceInfo(devinfo, m_SerialBaudrate==230400?10:7);
++
++  if ( verbose )
++    printf( "[CYdLidar::pingDeviceInfo]: trying baudrate %d %s\n", m_SerialBaudrate, IS_OK(op_result) ? "succeeded" : "fails" );
++
++  if (!IS_OK(op_result)) {
++    return false;
++  }
++
++  firmware_version = devinfo.firmware_version;
++  hardware_version = devinfo.hardware_version;
++  for ( int i = 15; i >= 0; --i )
++    serialnum[i] = devinfo.serialnum[i];
++
++  model = devinfo.model;
++  
++  return true;
++}
++
++
++
+ /*-------------------------------------------------------------
+                         initialize
+ -------------------------------------------------------------*/
+@@ -474,9 +539,12 @@ bool CYdLidar::turnOn()
+       return false;
+     }
+   }
+-  printf("[YDLIDAR] Successed to start scan mode, Elapsed time %u ms\n", getms() - t);
+-  fflush(stdout);
+ 
++  if ( verbose )
++  { printf("[YDLIDAR] Successed to start scan mode, Elapsed time %u ms\n", getms() - t);
++    fflush(stdout);
++  }
++  
+   t = getms();
+   //计算采样率
+   if (checkLidarAbnormal())
+@@ -488,16 +556,20 @@ bool CYdLidar::turnOn()
+     isScanning = false;
+     return false;
+   }
+-  printf("[YDLIDAR] Successed to check the lidar, Elapsed time %u ms\n", getms() - t);
+-  fflush(stdout);
+ 
++  if ( verbose )
++  { printf("[YDLIDAR] Successed to check the lidar, Elapsed time %u ms\n", getms() - t);
++    fflush(stdout);
++  }
++  
+   if (m_SingleChannel && !isNetTOFLidar(m_LidarType))
+   {
+     handleSingleChannelDevice();
+   }
+   else
+   {
+-    printf("[YDLIDAR] Current Sampling Rate : %.02fK\n", m_SampleRate);
++    if ( verbose )
++      printf("[YDLIDAR] Current Sampling Rate : %.02fK\n", m_SampleRate);
+   }
+ 
+   m_field_of_view = 360.f;
+@@ -523,7 +595,8 @@ bool CYdLidar::turnOn()
+   m_AllNode = 0;
+   m_PointTime = lidarPtr->getPointTime();
+   lidarPtr->setAutoReconnect(m_AutoReconnect);
+-  printf("[YDLIDAR] Now lidar is scanning...\n");
++  if ( verbose )
++    printf("[YDLIDAR] Now lidar is scanning...\n");
+   fflush(stdout);
+ 
+   isScanning = true;
+@@ -812,7 +885,8 @@ bool CYdLidar::turnOff()
+ 
+   if (isScanning)
+   {
+-    printf("[YDLIDAR] Now lidar scanning has stopped!\n");
++    if ( verbose )
++      printf("[YDLIDAR] Now lidar scanning has stopped!\n");
+     fflush(stdout);
+   }
+ 
+@@ -967,7 +1041,10 @@ void CYdLidar::handleVersionInfoByPackage(const LaserDebug &debug)
+ 
+   if (ParseLaserDebugInfo(debug, info))
+   {
+-    if (printfVersionInfo(info, m_SerialPort, m_SerialBaudrate))
++    if ( verbose )
++      printfVersionInfo(info, m_SerialPort, m_SerialBaudrate);
++    bool success = (info.firmware_version != 0 || info.hardware_version != 0);
++    if (success)
+     {
+       std::string serial_number;
+       Major = (uint8_t)(info.firmware_version >> 8);
+@@ -1147,8 +1224,10 @@ bool CYdLidar::checkLidarAbnormal()
+         int total = accumulate(data.begin(), data.end(), 0);
+         int mean = total / data.size(); // mean value
+         m_FixedSize = (static_cast<int>((mean + 5) / 10)) * 10;
+-        printf("[YDLIDAR] Single Fixed Size: %d\n", m_FixedSize);
+-        printf("[YDLIDAR] Sample Rate: %.02fK\n", m_SampleRate);
++        if ( verbose )
++	{ printf("[YDLIDAR] Single Fixed Size: %d\n", m_FixedSize);
++	  printf("[YDLIDAR] Sample Rate: %.02fK\n", m_SampleRate);
++	}
+         return false;
+       }
+     }
+@@ -1285,8 +1364,10 @@ bool CYdLidar::CalculateSampleRate(int count, double scan_time)
+       m_FixedSize = m_SampleRate * 1000 / (m_ScanFrequency - 0.1);
+     
+     if (!isSDMLidar(m_LidarType)) //非SDM雷达才打印Fixed Size
+-      printf("[YDLIDAR] Fixed Size: %d\n", m_FixedSize);
+-    printf("[YDLIDAR] Sample Rate: %.02fK\n", m_SampleRate);
++      if ( verbose )
++	printf("[YDLIDAR] Fixed Size: %d\n", m_FixedSize);
++    if ( verbose )
++      printf("[YDLIDAR] Sample Rate: %.02fK\n", m_SampleRate);
+   }
+ 
+   return ret;
+@@ -1312,8 +1393,9 @@ bool CYdLidar::getDeviceHealth()
+ 
+   if (IS_OK(op_result))
+   {
+-    printf("[YDLIDAR] Lidar running correctly! The health status: %s\n",
+-           (int)healthinfo.status == 0 ? "good" : "bad");
++    if ( verbose )
++      printf("[YDLIDAR] Lidar running correctly! The health status: %s\n",
++	     (int)healthinfo.status == 0 ? "good" : "bad");
+ 
+     if (healthinfo.status == 2)
+     {
+@@ -1329,7 +1411,8 @@ bool CYdLidar::getDeviceHealth()
+   }
+   else
+   {
+-    fprintf(stderr, "[YDLIDAR] Error, cannot retrieve YDLidar health code: %x\n", op_result);
++    if ( !trying )
++      fprintf(stderr, "[YDLIDAR] Error, cannot retrieve YDLidar health code: %x\n", op_result);
+     return false;
+   }
+ }
+@@ -1349,7 +1432,8 @@ bool CYdLidar::getDeviceInfo()
+     DriverInterface::DEFAULT_TIMEOUT / 2);
+   if (!IS_OK(op_result))
+   {
+-    fprintf(stderr, "[YDLIDAR] Fail to get device information\n");
++    if ( !trying )
++      fprintf(stderr, "[YDLIDAR] Fail to get device information\n");
+     return false;
+   }
+ 
+@@ -1396,7 +1480,10 @@ bool CYdLidar::getDeviceInfo()
+   lidarPtr->setIntensityBit(m_IntensityBit);
+   ret = true;
+ 
+-  if (printfVersionInfo(di, m_SerialPort, m_SerialBaudrate))
++  if ( verbose )
++    printfVersionInfo(di, m_SerialPort, m_SerialBaudrate);
++  bool success = (di.firmware_version != 0 || di.hardware_version != 0);
++  if (success)
+   {
+     Major = (uint8_t)(di.firmware_version >> 8);
+     Minjor = (uint8_t)(di.firmware_version & 0xff);
+@@ -1490,7 +1577,8 @@ void CYdLidar::handleSingleChannelDevice()
+   lidar_model = devinfo.model;
+   // defalutSampleRate = getDefaultSampleRate(devinfo.model);
+ 
+-  printf("[YDLIDAR] Single Channel Current Sampling Rate: %.02fK\n", m_SampleRate);
++  if ( verbose )
++    printf("[YDLIDAR] Single Channel Current Sampling Rate: %.02fK\n", m_SampleRate);
+   return;
+ }
+ 
+@@ -1507,7 +1595,8 @@ void CYdLidar::checkSampleRate()
+ 
+   if (IS_OK(ans))
+   {
+-    printf("[YDLIDAR] Get origin sample rate code: %u\n", _rate.rate);
++    if ( verbose )
++      printf("[YDLIDAR] Get origin sample rate code: %u\n", _rate.rate);
+     if (!isTOFLidarByModel(lidar_model))
+     {
+       //非TG系列雷达获取采样率码转成采样率值
+@@ -1538,7 +1627,8 @@ void CYdLidar::checkSampleRate()
+     m_SampleRate = sr;
+     defalutSampleRate.clear();
+     defalutSampleRate.push_back(m_SampleRate);
+-    printf("[YDLIDAR] Get sample rate: %.02fK\n", m_SampleRate);
++    if ( verbose )
++      printf("[YDLIDAR] Get sample rate: %.02fK\n", m_SampleRate);
+   }
+ }
+ 
+@@ -1620,7 +1710,8 @@ bool CYdLidar::checkScanFrequency()
+ 
+   m_ScanFrequency -= frequencyOffset;
+   m_FixedSize = m_SampleRate * 1000 / (m_ScanFrequency - 0.1);
+-  printf("[YDLIDAR] Current scan frequency: %.02fHz\n", m_ScanFrequency);
++  if ( verbose )
++    printf("[YDLIDAR] Current scan frequency: %.02fHz\n", m_ScanFrequency);
+   // printf("[YDLIDAR] Fixed size: %d\n", m_FixedSize);
+   return true;
+ }
+@@ -1687,7 +1778,8 @@ bool CYdLidar::checkCalibrationAngle(const std::string &serialNumber)
+       m_isAngleOffsetCorrected = (angle.angle != 180 * zero_offset_angle_scale);
+       m_AngleOffset = angle.angle / zero_offset_angle_scale;
+       ret = true;
+-      printf("[YDLIDAR] Successfully obtained the %s offset angle[%f] from the lidar[%s]\n", m_isAngleOffsetCorrected ? "corrected" : "uncorrrected", m_AngleOffset,
++      if ( verbose )
++	printf("[YDLIDAR] Successfully obtained the %s offset angle[%f] from the lidar[%s]\n", m_isAngleOffsetCorrected ? "corrected" : "uncorrrected", m_AngleOffset,
+              serialNumber.c_str());
+       return ret;
+     }
+@@ -1695,7 +1787,8 @@ bool CYdLidar::checkCalibrationAngle(const std::string &serialNumber)
+     retry++;
+   }
+ 
+-  printf("[YDLIDAR] Current %s AngleOffset : %f°\n",
++  if ( verbose )
++    printf("[YDLIDAR] Current %s AngleOffset : %f°\n",
+          m_isAngleOffsetCorrected ? "corrected" : "uncorrrected", m_AngleOffset);
+   return ret;
+ }
+@@ -1707,7 +1800,8 @@ bool CYdLidar::checkCOMMs()
+ {
+   if (!lidarPtr)
+   {
+-    printf("[YDLIDAR] SDK initializing\n");
++    if ( verbose )
++      printf("[YDLIDAR] SDK initializing\n");
+ 
+     //根据雷达类型创建对应的实例
+     if (isNetTOFLidar(m_LidarType))
+@@ -1727,9 +1821,12 @@ bool CYdLidar::checkCOMMs()
+       return false;
+     }
+ 
+-    printf("[YDLIDAR] SDK has been initialized\n");
+-    printf("[YDLIDAR] SDK Version: %s\n", lidarPtr->getSDKVersion().c_str());
+-    fflush(stdout);
++    if ( verbose )
++    { printf("[YDLIDAR] SDK has been initialized\n");
++      printf("[YDLIDAR] SDK Version: %s\n", lidarPtr->getSDKVersion().c_str());
++      fflush(stdout);
++    }
++    
+     lidarPtr->setSupportMotorDtrCtrl(m_SupportMotorDtrCtrl);
+   }
+ 
+@@ -1777,7 +1874,8 @@ bool CYdLidar::checkCOMMs()
+   lidarPtr->setLidarType(m_LidarType);
+   lidarPtr->setScanFreq(m_ScanFrequency);
+ 
+-  printf("[YDLIDAR] Lidar successfully connected %s[%d]\n", 
++  if ( verbose )
++    printf("[YDLIDAR] Lidar successfully connected %s[%d]\n", 
+     m_SerialPort.c_str(), m_SerialBaudrate);
+   return true;
+ }
+diff --git a/src/CYdLidar.h b/src/CYdLidar.h
+index c6ad5c7..e5b665b 100644
+--- a/src/CYdLidar.h
++++ b/src/CYdLidar.h
+@@ -876,6 +876,13 @@ class YDLIDAR_API CYdLidar {
+    */
+   bool initialize();
+ 
++  /**
++   * @brief Tries to open a device with a given specification,
++   * @return true if successful, otherwise false.
++   */
++
++  bool pingDeviceInfo( int &model, int &firmware_version, int &hardware_version, uint8_t serialnum[16] );
++
+   /**
+   * @brief Return LiDAR's version information in a numeric form.
+   * @param version Pointer to a version structure for returning the version information.
+@@ -1066,7 +1073,7 @@ class YDLIDAR_API CYdLidar {
+    */
+   bool isAngleOffsetCorrected() const;
+ 
+- private:
++ public:
+   bool    isScanning;               ///< LiDAR is Scanning
+   int     m_FixedSize;              ///< Fixed LiDAR Points
+   float   m_AngleOffset;            ///< Zero angle offset value
+@@ -1091,6 +1098,8 @@ class YDLIDAR_API CYdLidar {
+   float m_field_of_view;            ///< LiDAR Field of View Angle.
+   LidarVersion m_LidarVersion;      ///< LiDAR Version information
+   float zero_offset_angle_scale;   ///< LiDAR Zero Offset Angle
++  bool  verbose;
++  bool  trying;
+ 
+  private:
+   std::string m_SerialPort;         ///< LiDAR serial port
+diff --git a/src/GS1LidarDriver.cpp b/src/GS1LidarDriver.cpp
+index dcaf0d0..7735506 100644
+--- a/src/GS1LidarDriver.cpp
++++ b/src/GS1LidarDriver.cpp
+@@ -717,8 +717,8 @@ namespace ydlidar
+                 {
+                     timeout_count++;
+                     local_scan[0].sync_flag = Node_NotSync;
+-                    fprintf(stderr, "timeout count: %d\n", timeout_count);
+-                    fflush(stderr);
++//                    fprintf(stderr, "timeout count: %d\n", timeout_count);
++//                    fflush(stderr);
+                 }
+             }
+             else
+diff --git a/src/YDlidarDriver.cpp b/src/YDlidarDriver.cpp
+index 6ba13ed..0352c6f 100644
+--- a/src/YDlidarDriver.cpp
++++ b/src/YDlidarDriver.cpp
+@@ -169,6 +169,38 @@ result_t YDlidarDriver::connect(const char *port_path, uint32_t baudrate)
+   return RESULT_OK;
+ }
+ 
++bool YDlidarDriver::pingDeviceInfo( const char *port_path, int &model, int &firmware_version, int &hardware_version, uint8_t serialnum[16], int  baudrate)
++{
++  ScopedLocker lck(_cmd_lock);
++  m_baudrate = baudrate;
++  serial_port = string(port_path);
++
++  if (!_serial) {
++    if (m_TranformerType == YDLIDAR_TYPE_TCP) {
++      _serial = new CActiveSocket();
++    } else {
++      _serial = new serial::Serial(port_path, m_baudrate,
++                                   serial::Timeout::simpleTimeout(DEFAULT_TIMEOUT));
++    }
++
++    _serial->bindport(port_path, baudrate);
++  }
++
++  {
++    ScopedLocker l(_lock);
++
++    if (!_serial->open()) {
++      setDriverError(NotOpenError);
++      return RESULT_FAIL;
++    }
++
++    m_isConnected = true;
++  }
++
++  return m_isConnected;
++}
++  
++
+ const char *YDlidarDriver::DescribeError(bool isTCP) {
+   char const *value = "";
+ 
+@@ -1947,9 +1979,6 @@ result_t YDlidarDriver::createThread()
+     return RESULT_FAIL;
+   }
+ 
+-  printf("[YDLIDAR] Create thread 0x%X\n", _thread.getHandle());
+-  fflush(stdout);
+-
+   return RESULT_OK;
+ }
+ 
+diff --git a/src/YDlidarDriver.h b/src/YDlidarDriver.h
+index 9db5c00..e6e4437 100644
+--- a/src/YDlidarDriver.h
++++ b/src/YDlidarDriver.h
+@@ -92,6 +92,12 @@ class YDlidarDriver : public DriverInterface {
+    */
+   virtual result_t connect(const char *port_path, uint32_t baudrate);
+ 
++  /**
++   * @brief Tries to open a device with a given specification and returns if it was succesful
++   */
++  virtual bool pingDeviceInfo( const char *port_path, int &model, int &firmware_version, int &hardware_version, uint8_t serialnum[16], int defaultBaudrate );
++
++
+   /**
+    * @brief Returns a human-readable description of the given error code
+    *  or the last error code of a socket or serial port

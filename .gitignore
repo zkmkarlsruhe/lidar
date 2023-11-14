@@ -1,0 +1,56 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# IDE
+.vscode/*
+CMakeLists.txt.*
+
+# ~
+*~
+\#*
+.\#*
+*\#
+
+.DS_Store
+
+# Folders
+lidartool/rplidar_sdk/
+lidartool/oradar_sdk/build/
+lidartool/Trackable/CImg/
+lidartool/YDLidar-SDK/
+lidartool/libhttpserver/
+lidartool/lidarTool
+lidartool/oradar_sdk/build
+lidarconfig-*
+
+# Executables
+lidartool/lidarTool
+lidartool/packedPlayer
+/lidaradmin/lidarAdmin

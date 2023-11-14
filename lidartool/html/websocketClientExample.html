@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <center><title>Lidar WebSockets example</title></center>
+        <meta name="author"    value="linter@zkm.de" />
+        <meta name="licsense"  value="BSD Simplified License" />
+        <meta name="robots"    value="none" />
+        <style type="text/css">
+            * { margin: 5px; }
+        </style>
+    </head>
+    <body>
+        <h3>Lidar WebSockets example</h3><br/>
+        <div>
+            <p>This is a super basic example of how to connect to and interact with the lidar tool websocket server.</p>
+            <ul><br />
+                <li>run the lidar tool with <code>+observer @type=websocket :frame,frame_id,objects,type,enter,move,leave,x,y,z,size,id,lifespan,count @port=5000</code> in the command line)</li>
+                <li>Press the <em>Reload</em> button of your browser in order to connect to the websocket server. Streamed data should be be reported.</li>
+                <li>
+                    Experiment with sending the following messages:<br /><br />
+	            <ul>
+		        <li id="msg1" />
+		        <li id="msg2" />
+		        <li id="msg3" />
+		        <li id="msg4" />
+		        <li id="msg5" />
+		        <li id="msg6" />
+		        <li id="msg7" />
+		        <li id="msg8" />
+		        <li id="msg9" />
+		        <li id="msg10" />
+		        <li id="msg11" />
+	            </ul>
+	        </li>
+            </ul>
+            <p><br />
+	  Play with entering a message in the text box below; Press <em>Send</em> to send it to the server: <br/>
+            </p>
+        </div>
+        <fieldset>
+            <legend>Demo</legend>
+            <input type="text" name="input" id="input" value="" />
+            <input type="button" name="inpuBtn" id="inputBtn" value="Send" />
+            <div><u>Server responses</u></div>
+            <div id="output"></div>
+        </fieldset>
+        
+        <script type="text/javascript">
+
+            function setButtonMessage( id, message, comment ){
+               var li = document.getElementById( "msg"+id );
+               li.innerHTML = ""+comment+":<br/><button id='btn"+id+"'>Send</button><code>"+message + " </code>";
+               var btn = document.getElementById( "btn"+id );
+               btn.onclick = function( evt ){
+                  sendMessage( message );
+               };
+
+            };
+
+            // Putting the js here after the dom is available in the browser because not using a framework
+            var PORT = 5000;
+            var ws;
+            var input    = document.getElementById("input");
+            var inputBtn = document.getElementById("inputBtn");
+            var output   = document.getElementById("output");
+            var interval = 0;
+
+            setButtonMessage( 1, 'streamData:false', 'data streaming off' );
+            setButtonMessage( 2, 'streamData:true', 'data streaming on' );
+            setButtonMessage( 3, 'continuous:false', 'send data only on changes' );
+            setButtonMessage( 4, 'continuous:true', 'send data every frame' );
+            setButtonMessage( 5, 'filter:count', 'report the number of objects detected' );
+            setButtonMessage( 6, 'filter:switch', 'report if there is at least one object detected' );
+            setButtonMessage( 7, 'filter:timestamp=ts,frame,frame_id,object=person,move,x,y,z,size,id', 'report objects attributes and rename tag <code>timestamp</code>  to <code>ts</code> and <code>object</code> to <code>person</code>' );
+            setButtonMessage( 8, '{"continuous":false,"filter":"count"}', 'set multiple parameters in one message via json' );
+            setButtonMessage( 9, 'reportDistance:0.5', 'report only object position changes of 0.5 meter if not continuous' );
+            setButtonMessage( 10, 'reportDistance:0.05', 'report only object position changes of 0.05 meter if not continuous' );
+            setButtonMessage( 11, 'reset', 'reset report as if it would just be started' );
+ 
+            inputBtn.onclick = function( evt ){
+                sendMessage( input.value );
+            };
+
+            input.onkeypress = function( evt ){
+                var code = evt.keyCode ? evt.keyCode : evt.which;
+                if( code == 13 ) {
+                    sendMessage(input.value);
+                }
+            };
+
+            initWS( ws );
+            
+            function initWS() {
+
+              ws = new WebSocket("ws://"+window.location.hostname+":" + PORT );
+
+              ws.onmessage = function( evt ){
+                 addMessage( evt.data );
+              };
+
+              ws.onerror = function( evt ) { 
+                  addMessage( '<i>WebSocket error :(</i>' );
+              };
+
+              ws.onopen = function( evt ) { 
+                  addMessage( '<i>Connected</i>' );
+              };
+
+              ws.onclose = function( evt ) {
+                  addMessage( '<i>Disconnected</i>' );
+              };
+            }
+
+            function sendMessage( msg ){
+              ws.send(msg);
+            }
+
+            function addMessage( msg ){
+              output.innerHTML = truncate(msg + '<br />' + output.innerHTML, 10000); 
+            }
+
+	    function truncate(str, n){
+	        return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
+	    };
+        </script>
+    </body>
+</html>
+

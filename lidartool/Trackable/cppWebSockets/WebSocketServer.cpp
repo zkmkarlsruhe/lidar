@@ -1,0 +1,258 @@
+/** --------------------------------------------------------------------------
+ *  WebSocketServer.cpp
+ *
+ *  Base class that WebSocket implementations must inherit from.  Handles the
+ *  client connections and calls the child class callbacks for connection
+ *  events like onConnect, onMessage, and onDisconnect.
+ *
+ *  Author    : Jason Kruse <jason@jasonkruse.com> or @mnisjk
+ *  Copyright : 2014
+ *  License   : BSD (see LICENSE)
+ *  --------------------------------------------------------------------------
+ **/
+
+#include <stdlib.h>
+#include <string>
+#include <cstring>
+#include <sys/time.h>
+#include <fcntl.h>
+#include <mutex>
+#include "libwebsockets.h"
+#include "Util.h"
+#include "WebSocketServer.h"
+
+using namespace std;
+
+// 0 for unlimited
+#define MAX_BUFFER_SIZE 0
+
+// Nasty hack because certain callbacks are statically defined
+
+static int callback_main(   struct lws *wsi,
+                            enum lws_callback_reasons reason,
+                            void *user,
+                            void *in,
+                            size_t len )
+{
+    int result = 0;
+  
+    int fd;
+    switch( reason ) {
+        case LWS_CALLBACK_ESTABLISHED:
+        {
+	  char name[200], rip[200];
+	  WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+	  fd = lws_get_socket_fd( wsi );
+	  lws_get_peer_addresses( wsi, fd, name, 200, rip, 200 );
+	  self->onConnectWrapper( fd, rip );
+	  lws_callback_on_writable( wsi );
+	  break;
+	}
+        case LWS_CALLBACK_SERVER_WRITEABLE:
+        {
+	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+	  
+	    fd = lws_get_socket_fd( wsi );
+    	    
+	    if ( fd <= 0 )
+            { result = -1;
+	      break;
+	    }
+	    
+	    bool success = true;
+	    
+            while( success && self->connections.count(fd) && !self->connections[fd]->buffer.empty() )
+            {
+	        std::vector<uint8_t> &message = self->connections[fd]->buffer.front();
+                int msgLen = message.size();
+
+		size_t padded_len = msgLen + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING;
+		unsigned char *buf = (unsigned char*)malloc(padded_len);
+
+		memset(buf,0,padded_len);
+		memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, &message[0], msgLen);
+
+		int charsSent = lws_write(wsi,&buf[LWS_SEND_BUFFER_PRE_PADDING],msgLen,self->_binary?LWS_WRITE_BINARY:LWS_WRITE_TEXT);
+
+		free( (void*) buf);
+
+                if( charsSent < msgLen )
+                { self->onErrorWrapper( fd, string( "Error writing to socket" ) );
+		  success = false;
+		  result = -1;
+		}
+		else
+		  self->connections[fd]->buffer.pop_front();
+            }
+	    if ( success )
+	      lws_callback_on_writable( wsi );
+            break;
+	}
+        case LWS_CALLBACK_RECEIVE:
+        {
+	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+            self->onMessage( lws_get_socket_fd( wsi ), string( (const char *)in, len ) );
+            break;
+	}
+        case LWS_CALLBACK_CLOSED:
+        {
+	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+            self->onDisconnectWrapper( lws_get_socket_fd( wsi ) );
+	    result = -1;
+            break;
+	}
+        default:
+            break;
+    }
+    return result;
+}
+
+static struct lws_protocols protocols[] = {
+  {
+    "trackable",
+    callback_main,
+    0, // user data struct not used
+    MAX_BUFFER_SIZE,
+  },
+  { NULL, NULL, 0, 0 } // terminator
+};
+
+WebSocketServer::WebSocketServer( int port, const string certPath, const string& keyPath, bool binary )
+{
+    this->_binary   = binary;
+    this->_port     = port;
+    this->_certPath = certPath;
+    this->_keyPath  = keyPath;
+    lws_set_log_level( 0, lwsl_emit_syslog ); // We'll do our own logging, thank you.
+    struct lws_context_creation_info info;
+    memset( &info, 0, sizeof info );
+    info.port = this->_port;
+    info.iface = NULL;
+    info.protocols = protocols;
+    info.user = (void*)this; /* HERE */
+
+#ifndef LWS_NO_EXTENSIONS
+    info.extensions = lws_get_internal_extensions( );
+#endif
+
+    if( !this->_certPath.empty( ) && !this->_keyPath.empty( ) )
+    {
+        Util::log( "Using SSL certPath=" + this->_certPath + ". keyPath=" + this->_keyPath + "." );
+        info.ssl_cert_filepath        = this->_certPath.c_str( );
+        info.ssl_private_key_filepath = this->_keyPath.c_str( );
+    }
+    else
+    {
+        Util::log( "Not using SSL" );
+        info.ssl_cert_filepath        = NULL;
+        info.ssl_private_key_filepath = NULL;
+    }
+    info.gid = -1;
+    info.uid = -1;
+    info.options = 0;
+
+    // keep alive
+    info.ka_time = 60; // 60 seconds until connection is suspicious
+    info.ka_probes = 10; // 10 probes after ^ time
+    info.ka_interval = 10; // 10s interval for sending probes
+    this->_context = lws_create_context( &info );
+    if( !this->_context )
+      fprintf( stderr, "libwebsocket init failed" );
+    Util::log( "Server started on port " + Util::toString( this->_port ) );
+
+    // Some of the libwebsocket stuff is define statically outside the class. This
+    // allows us to call instance variables from the outside.  Unfortunately this
+    // means some attributes must be public that otherwise would be private.
+}
+
+WebSocketServer::~WebSocketServer()
+{
+    // Free up some memory
+    for( map<int,Connection*>::const_iterator it = this->connections.begin( ); it != this->connections.end( ); ++it )
+    {
+        Connection* c = it->second;
+        this->connections.erase( it->first );
+        delete c;
+    }
+}
+
+void WebSocketServer::onConnectWrapper( int socketID, const char *remoteIP )
+{
+    Connection* c = new Connection;
+    c->createTime = time( 0 );
+    c->keyValueMap["remoteIP"] = remoteIP;
+    this->connections[ socketID ] = c;
+    this->onConnect( socketID );
+}
+
+void WebSocketServer::onDisconnectWrapper( int socketID )
+{
+    this->onDisconnect( socketID );
+    this->_removeConnection( socketID );
+}
+
+void WebSocketServer::onErrorWrapper( int socketID, const string& message )
+{
+    Util::log( "Error: " + message + " on socketID '" + Util::toString( socketID ) + "'" );
+    this->onError( socketID, message );
+    this->_removeConnection( socketID );
+}
+
+void WebSocketServer::send( int socketID, const char *data, int length )
+{
+    // Push this onto the buffer. It will be written out when the socket is writable.
+  this->connections[socketID]->buffer.push_back( std::vector<uint8_t>(data, &data[length]) );
+}
+
+void WebSocketServer::broadcast( const char *data, int length )
+{
+  for( map<int,Connection*>::const_iterator it = this->connections.begin( ); it != this->connections.end(); ++it )
+    this->send( it->first, data, length );
+
+  _deleteRemovedConnections();
+}
+
+void WebSocketServer::setValue( int socketID, const string& name, const string& value )
+{
+    this->connections[socketID]->keyValueMap[name] = value;
+}
+
+string WebSocketServer::getValue( int socketID, const string& name )
+{
+    return this->connections[socketID]->keyValueMap[name];
+}
+
+int WebSocketServer::getNumberOfConnections( )
+{
+  _deleteRemovedConnections();
+
+   return this->connections.size();
+}
+
+void WebSocketServer::wait( uint64_t timeout )
+{
+  _deleteRemovedConnections();
+
+  if( lws_service( this->_context, timeout ) < 0 )
+    fprintf( stderr, "WebSocketServer::wait(): Error polling for socket activity." );
+}
+
+void WebSocketServer::_removeConnection( int socketID )
+{
+  connectionsToRemove.emplace( socketID );
+}
+
+void WebSocketServer::_deleteRemovedConnections()
+{
+  for ( auto socketID: this->connectionsToRemove )
+  {
+    if ( this->connections.find( socketID ) != this->connections.end() )
+    { Connection* c = this->connections[ socketID ];
+      this->connections.erase( socketID );
+      delete c;
+    }
+  }
+
+  this->connectionsToRemove.clear();
+}
+ 

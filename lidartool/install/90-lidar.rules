@@ -1,0 +1,4 @@
+KERNEL=="ttyUSB*", DRIVERS=="cp210x", MODE="0666"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d4", MODE="0666"
+KERNEL=="ttyUSB*", DRIVERS=="cp210x", PROGRAM="pathToInstallDir/lidarTool +udev %k", SYMLINK+="%c{1}", SYMLINK+="%c{2}"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d4", PROGRAM="pathToInstallDir/lidarTool +udev %k", SYMLINK+="%c{1}", SYMLINK+="%c{2}"

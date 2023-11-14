@@ -1,0 +1,47 @@
+# Group Type Num NodeId Active MAC
+
+wssfld ld 01 001 +
+wssfld ld 02 002 +
+wssfld ld 03 003 +
+wssfld ld 04 004 +
+wssfld ld 05 005 +
+wssfld ld 06 006 +
+wssfld ld 07 007 +
+wssfld ld 08 008 +
+wssfld ld 09 009 +
+wssfld ld 10 010 +
+wssfld ld 11 011 +
+wssfld ld 12 012 +
+
+hrshmn ld 01 013 +
+hrshmn ld 02 014 +
+hrshmn ld 03 015 +
+hrshmn ld 04 016 +
+hrshmn ld 05 017 +
+
+intspc ld 01 051 +
+intspc ld 02 052 +
+intspc ld 03 053 +
+intspc ld 04 054 +
+
+foertr ld 01 061 + 
+foertr ld 02 062 + 
+foertr ld 03 063 + 
+foertr ld 04 064 + 
+
+bridle ld 01 071 +
+bridle ld 02 072 +
+bridle ld 03 073 +
+bridle ld 04 074 +
+bridle ld 05 075 +
+
+dambck ld 01 081 + 
+dambck ld 02 082 + 
+dambck ld 03 083 + 
+dambck ld 04 084 + 
+
+poltol ld 01 091 + 
+poltol ld 02 092 -
+poltol ld 03 093 + 	
+poltol ld 04 094 + 
+

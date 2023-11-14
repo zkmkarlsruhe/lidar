@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=$confDir/StartAdmin.sh
+Hidden=false
+X-MATE-Autostart-enabled=false
+Name[en_US]=Lidar Admin
+Name=Lidar Admin
+Comment[en_US]=Start Lidar Admin
+Comment=Start Lidar Admiin
+X-MATE-Autostart-Delay=0
