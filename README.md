@@ -46,12 +46,13 @@ lidar/
 
 - **lidarconfig-...**: are created for each configuration (... is the configuration name) and contain configuration specific scripts and data
 
-Dependencies
+System Requirements
 ------------
 
-* Linux (developed with Ubuntu 20.04 Mate)
-* g++, std=c++17
-* cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config jq bc
+Linux, developed with Ubuntu 20.04 Mate
+
+Required packages:
+* g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config jq bc
 
 Optional:
 * libmosquitto-dev for MQTT support
