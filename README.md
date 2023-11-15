@@ -51,6 +51,11 @@ System Requirements
 
 Linux, developed with Ubuntu 20.04 Mate.
 
+Hardware:
+* Desktop PC
+* Rapberry 3 or 4 with raspios-bullseye
+* [**Radxa Rock Pi S**](https://wiki.radxa.com/RockpiS) with  debian-buster
+
 Required packages:
 * g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config jq bc
 
