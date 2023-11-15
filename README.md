@@ -49,10 +49,10 @@ lidar/
 System Requirements
 ------------
 
-System OS: Linux
+Operating System: Linux
 
 Hardware and OS:
-* Desktop PC with Ubuntu 20.04 Mate
+* Desktop PC with Ubuntu 20.04 (LTS) Mate 
 * Rapberry 3 or 4 with raspios-bullseye
 * [**Radxa Rock Pi S**](https://wiki.radxa.com/RockpiS) with  debian-buster
 
