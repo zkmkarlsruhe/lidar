@@ -1,19 +1,18 @@
-# Record Packed file format
+# Record Packed File Format
 
-set variable recordPackedDir to an existing directory
+Set variable recordPackedDir to an existing directory
 
-recording is done only in production mode
+Recording is done only in production mode
 
-output can be processed by packedPlayer 
-```console
-../lidartool/packedPlayer +conf confName +i inFile.pkf
-```
-
-You have to build it beforehand
+Build the packedPlayer tool
 ```console
 > cd ../lidartool
 > make packedPlayer
 ```
 
-see `packedPlayer -h` for more info
+Output in .pfk files can then be processed by packedPlayer 
+```console
+../lidartool/packedPlayer +conf confName +i inFile.pkf
+```
 
+See `packedPlayer -h` output for more info

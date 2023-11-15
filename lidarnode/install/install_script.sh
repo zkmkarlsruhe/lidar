@@ -9,7 +9,7 @@
 
 nodedir=$(pwd)
 
-#install dependencies
+# install dependencies
 
 cd ../lidartool
 ./install/install_script.sh

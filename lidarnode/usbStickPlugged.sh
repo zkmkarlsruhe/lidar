@@ -31,7 +31,7 @@ if [ -f $mountPoint/setup.sh ] ; then
 
 elif [ -f $mountPoint/config.txt ] ; then
     if [ "$1" == "mount" ] ; then
-        if [ "$(diff $mountPoint/config.txt config.txt" != "" ] ; then
+        if [ "$(diff $mountPoint/config.txt config.txt)" != "" ] ; then
             su $2 ./$CMD
             reboot
         else

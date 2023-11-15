@@ -54,4 +54,3 @@ cd ../lidarconfig-myosc
   a1m8:1
   ```
   
-   

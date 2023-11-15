@@ -10,7 +10,7 @@ This documentation is based on a LIDAR_LD06 sensor and a USB-to-TTL-adapter CR21
 
 The pin labeling may vary slightly, if using other models.
 
-The following list, plans and fotos show, how the sensor and adapter have to be wired
+The following list, plans and photos show how the sensor and adapter have to be wired
 
 | assignment Lidar | cable-colour lidar | cable-colour Adapter |assignment Adapter |
 |:----------|:------| :------| :------|
@@ -29,6 +29,6 @@ The following list, plans and fotos show, how the sensor and adapter have to be 
 
 ### Isolation
 
-After the whole cabels are wired, they can be isolated with shrink hoses, which also carries the advantage of a certain strain relief. 
+After the whole cables are wired, they can be isolated with shrink wrap, which also carries the advantage of a certain amount of strain relief. 
 
-The shrink hoses used in this case are 16mm and 9.5mm (diameters before shrinkage)
+The shrink wrap used in this case are 16mm and 9.5mm (diameters before shrinkage)

@@ -50,7 +50,7 @@ if [ "$numProc" == "" ]; then
     fi
 fi
 
-#install dependencies
+# install dependencies
 
 sudo apt-get -yq install build-essential git cmake automake libtool m4 libx11-dev libjpeg-dev libpng-dev libudev-dev wget libcurl4-openssl-dev curl dnsutils net-tools uuid-dev pkg-config jq bc
 
@@ -88,7 +88,7 @@ sudo sed -i "s#pathToInstallDir#`pwd`#g" /etc/udev/rules.d/90-lidar.rules
 
 ./hardware/install_pi.sh
 
-#reload udev
+# reload udev
 
 sudo service udev reload
 sudo service udev restart

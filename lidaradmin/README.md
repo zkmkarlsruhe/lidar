@@ -8,5 +8,3 @@ cd to this directory and install lidartool and lidaradmin in one go:
 cd lidar/lidaradmin
 ./install/install_script.sh
 ```
-
-# 

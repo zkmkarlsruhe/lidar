@@ -23,7 +23,7 @@ cd ../lidarconfig-myconf
 
 To create a new lidar configuration directory `lidar/lidarconfig-myconf` and initialize it with one of the samples use `editConfig.sh` with option *create path_to_sample/conf*.
 
-For example: to check out the osc sample, type:
+For example: to check out the OSC sample, type:
 
 ```console
 cd lidar/lidarconfig
@@ -44,7 +44,7 @@ See [samples/README](samples/README.md) for details.
 ./StartServer.sh +v
 ```
 
-In a web browser open page http://localhost:8080
+In a web browser, open page http://localhost:8080
 
 ### Start the Lidar Admin Server:
 
@@ -52,11 +52,11 @@ In a web browser open page http://localhost:8080
 ./StartAdmin.sh +v
 ```
 
-In a web browser open page [http://localhost:8000](http://localhost:8000)
+In a web browser, open page [http://localhost:8000](http://localhost:8000)
 
 ### Stop the Lidar Admin Server:
 
-The Lidar Admin Server can be manually be stoped by:
+The Lidar Admin Server can be manually stopped by:
 
 ```console
 ./StopAdmin.sh
@@ -75,7 +75,7 @@ The Lidar Server is usually started and stopped out of the web interface of the 
 
 The file **`config.txt`** contains several settings as variable definitions.
 
-You can use a guided edit of the **`config.txt`** file in your config derectory:
+You can use a guided edit of the **`config.txt`** file in your config directory:
 
 ```console
 ./editConfig.sh
@@ -83,7 +83,7 @@ You can use a guided edit of the **`config.txt`** file in your config derectory:
 
 See [CONFIG](doc/CONFIG.md) for details.
 
-This file is also copied to the client nodes, which use the server adress for registering. You have to set the `server` adress on which the admin server runs before copying.
+This file is also copied to the client nodes, which use the server address for registering. You have to set the `server` address on which the admin server runs before copying.
 
 ## Observers
 
@@ -91,7 +91,7 @@ Put your observer definitions in a text file `observer.txt` in the configuration
 
 ## Using Floor Plans
 
-If you want to use a Floor Plan in the background of the Web UI, you need a pixel image of the floor plan as PNG image. A secoond floor plan image is used to simulate sensors during the planning phase.
+If you want to use a Floor Plan in the background of the Web UI, you need a pixel image of the floor plan as PNG image. A second floor plan image is used to simulate sensors during the planning phase.
 
 See [BLUEPRINTS](doc/BLUEPRINTS.md) for more information.
 
@@ -101,7 +101,7 @@ Client nodes virtualize physical sensors in order to place them in a larger spac
 
 ### sensorDB.txt
 
-The file `sensorDB.txt` interfaces between physical or simulated client nodes and their appearance in the lidar system. Client nodes are identified by their MAC adress.
+The file `sensorDB.txt` interfaces between physical or simulated client nodes and their appearance in the lidar system. Client nodes are identified by their MAC address.
 
 Each node is defined by a single text line in `sensorDB.txt`. Node names are combinations of field values in the text line:
 
@@ -113,7 +113,7 @@ A sensor entry could look like that:
 
 `intr    ld  01    001      +  b8:27:eb:55:df:59`
 
-The node name is constructed as \$*GroupName*_\$*LidarModel*$*NrInGroup*. The entry above would result in the node name *intr_ld01* and would use UDP port (40)001 (while 40 is defined as *portBase* in `config.txt`).
+The node name is constructed as `$GroupName_$LidarModel$NrInGroup`. The entry above would result in the node name *intr_ld01* and would use UDP port (40)001 (while 40 is defined as *portBase* in `config.txt`).
 
 If a client node with MAC address b8:27:eb:55:df:59 registers to Lidar Admin, the port number and lidar device type to use is returned.
 
@@ -130,11 +130,11 @@ Available Sensor Types (defined in `modelMap.txt`):
 | a1          | a1m8             |
 | a3          | a3m1             |
 
-Use `+` or `-` to enable or disable nodes, e.g. if their MAC Adresses are not known yet or if they should not be used by the system.
+Use `+` or `-` to enable or disable nodes, e.g. if their MAC addresses are not known yet or if they should not be used by the system.
 
-Once you have changed the file `sensorDB.txt`, you have to update the database:
+Once you have changed the file `sensorDB.txt`, you have to update the database.
 
-### Update Sensor Entries:
+### Update Sensor Entries
 
 When the`sensorDB.txt` is modified, the button *Apply Config* in the LidarAdmin UI changes color to red. You can update all fies and restart the server by pressing this button.
 
@@ -154,9 +154,9 @@ For updating **Physical Nodes** related files:
 
 # Client Node Remote Login
 
-For lidarAdmin being able to manage the client nodes, it must have the permissions to **remote login via ssh**.
+In order for lidarAdmin to manage the client nodes, it must have permissions to **remote login via ssh**.
 
-You can either store the password of the remote clients in the config directory in the file `sshPasswd.txt`or login to the server and copy its ssh id with:
+You can either store the password of the remote clients in the config directory in the file `sshPasswd.txt`or log into to the server and copy its ssh id with:
 
 ```console
 ssh-copy-id user@client.example.com
@@ -166,7 +166,7 @@ See [lidarnode](../lidarnode) how to set up a client node.
 
 # Files
 
-The configuration directory contains application specific files:
+The configuration directory contains application-specific files:
 
 - **config.txt** contains configuration parameter. See [CONFIG](doc/CONFIG.md) for details. Please edit if needed.
 
@@ -202,13 +202,11 @@ For each sensor the following files are created in the configuration subdirector
 
 - **LidarMatrix_*devicenikname*.txt**, translation and rotation of sensor in space. Automatically generated when saving the registration. Do not edit
 
-### 
-
 ### nodeDB.txt
 
 The file `nodeDB.txt` stores information of physical nodes. It is automatically managed by `lidarAdmin`. Do not change it by hand.
 
-When nodes register with MAC and IP adresses, they get their UDP port offset and lidar type as return values.
+When nodes register with MAC and IP addresses, they get their UDP port offset and lidar type as return values.
 
 | MAC               | IP           | Current Port Offset | Login User | Pi Model |
 | ----------------- | ------------ | ------------------- | ---------- | -------- |

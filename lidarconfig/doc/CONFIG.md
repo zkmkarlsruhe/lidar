@@ -13,7 +13,7 @@ In case it does not exist, this creates the directory `lidar/lidarconfig-myconf`
 
 # Nodes vs. Local Devices
 
-#### Local Devices
+## Local Devices
 
 If you have sensors locally connected to the computer, set *useNodes* to **false** (default). The sensors to use are stored in file *LidarSensors.txt*.
 
@@ -21,7 +21,7 @@ If you have sensors locally connected to the computer, set *useNodes* to **false
 ./editConfig.sh create myconf useNodes=false
 ```
 
-#### Nodes
+## Nodes
 
 If you want to set up a configuration with several nodes running on Raspis, set *useNodes* to **true**. The definitions of the virtual sensors are stored in file *sensorDB.txt*:
 
@@ -80,21 +80,21 @@ The file `sensorDB.txt` interfaces between physical nodes identified by their MA
 | ---------- | ----------- | ----------- | ----------- | ------------- | ----------------- |
 | *intr*     | *yd*        | *03*        | 013         | +             | bc:23:ab:cb:45:cd |
 
-A node name is constructed as \$*GroupName*_\$*LidarModel\*$*NrInGroup*. The entry above would result in the node name: *intr_yd03*
+A node name is constructed as `$GroupName_$LidarModel$NrInGroup`. The entry above would result in the node name: *intr_yd03*
 
-Use `+` or `-` to enable or disable nodes, e.g. if their MAC Adresses are not known yet, or they do not exist in the network.
+Use `+` or `-` to enable or disable nodes, e.g. if their MAC addresses are not yet known yet or they do not exist in the network.
 
 The command `manageSensors.sh` creates and updates all files related to the enabled nodes.
 
-Once you have changed the file `sensorDB.txt`, you have to update the database:
+Once you have changed the file `sensorDB.txt`, you have to update the database.
 
-### Update Sensor Entries in Simulation Mode:
+For updating **Simulation Mode** related files:
 
 ```
 ./manageSensors.sh +s update
 ```
 
-### Update Sensor Entries for Physical Nodes:
+For updating **Physical Nodes** related files:
 
 ```
 ./manageSensors.sh update
@@ -102,7 +102,7 @@ Once you have changed the file `sensorDB.txt`, you have to update the database:
 
 ## nodeDB (File nodeDB.txt)
 
-The file `nodeDB.txt` stores information of physical nodes. It is automatically managed by `lidarAdmin`. Do not change it by hand.
+The file `nodeDB.txt` stores information of physical nodes and is automatically managed by `lidarAdmin`. Do not change it by hand.
 
 When nodes register with MAC and IP adresses, they get their UDP port offset and lidar type.
 
@@ -117,9 +117,9 @@ When nodes register with MAC and IP adresses, they get their UDP port offset and
 
 # Remote Login
 
-For lidaradmin being able to manage the client nodes, it must have the permissions to **remote login via ssh**.
+In order for lidaradmin to manage the client nodes, it must have the permissions to **remote login via ssh**.
 
-You can either store the password of the remote clients in `sshPasswd.txt`or login the server and copy its ssh id with:
+You can either store the password of the remote clients in `sshPasswd.txt`or log into the server and copy its ssh id with:
 
 ```console
 ssh-copy-id user@client.example.com

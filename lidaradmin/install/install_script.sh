@@ -19,7 +19,7 @@ fi
 
 admindir=$(pwd)
 
-#install dependencies
+# install dependencies
 
 if [ $(apt show libcurl4-openssl-de 2> /dev/null | wc -l) -gt 0 ] ; then
     sudo apt-get -yq install libcurl4-openssl-dev

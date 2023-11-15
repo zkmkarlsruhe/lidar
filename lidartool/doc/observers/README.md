@@ -1,42 +1,42 @@
 Observers
 =========
 
-Observers are a mechanism to report tracking information to external applications. Each observer implements a specific communication channel, e.g. using websockets, UDP or OSC. There can be an arbitrary number of observers, even using the same protocol, but different parameter. One observer coud be used to send OSC data to a realtime graphics application, while in parallel another observer sends UDP messages to another application, that switches a light on a person entering the room.
+Observers are a mechanism to report tracking information to external applications. Each observer implements a specific communication channel, e.g. using websockets, UDP, or OSC. There can be an arbitrary number of observers, even using the same protocol but with different parameters. One observer could be used to send OSC data to a realtime graphics application, while in parallel another observer sends UDP messages to another application that switches a light on when a person enters the room.
 
 Regions
 -------
 
-To each observer an arbitrary number of regions can be assigned, which mask the tracking data such that an object motion is reported by this observer only if the object is in one of these regions. Entering and leaving is reported for each region separately; regions then should not overlap.
+To each observer, an arbitrary number of regions can be assigned which mask the tracking data such that object motion is reported by this observer only if the object is in one of these regions. Entering and leaving is reported for each region separately; regions then should not overlap.
 
-Regions are rectangles in the world coordinate system, which are globally defined whithin the lidar tool and can be assigned to several observers. Thus a set of regions can be used by one observer to switch audio while another logs peoples movements to a file. Regions are created via command line interface and can be edited in the Web-GUI.
+Regions are rectangles in the world coordinate system which are globally defined within the lidar tool and can be assigned to several observers. Thus a set of regions can be used by one observer to switch audio while another logs visitor movement to a file. Regions are created via command line interface and can be edited in the Web GUI.
 
 See [Regions](../regions) for more information.
 
 ## Observer Definition
 
-Observers are defined in the command line when starting the lidar tool. Alternatively the definition can be stored in a configuration file, which is loaded on demand during startup of the lidar tool with setting the argument `+useObservers` for all observers, or `+useObserver name` for a single observer.
+Observers are defined in the command line when starting the lidar tool. Alternatively the definition can be stored in a configuration file, which is loaded on demand during startup of the lidar tool with setting the argument `+useObservers` for all observers or `+useObserver name` for a single observer.
 
 ## Definition in Command Line
 
-In the command line an observer is defined with a filter and a list of parameters. A parameter is defined by a key value pair preceeded by an `@`. Example: `@script=SwitchAudio.sh`
+In the command line, an observer is defined with a filter and a list of parameters. A parameter is defined by a key value pair preceded by an `@`. Example: `@script=SwitchAudio.sh`
 
 #### Observer Types
 
-The *type* of an observer is defined with the parameter *@type=XXX*. Type is one out of:
+The *type* of an observer is defined with the parameter *@type=XXX*. Type is one of the following:
 
 | Type              | Description                                                                   | Format                |
 |:----------------- |:----------------------------------------------------------------------------- |:--------------------- |
-| `file`            | writes log information into a file                                            | Json                  |
+| `file`            | writes log information to a file                                              | JSON                  |
 | `bash`            | calls a bash script if the occupation or number of people in a region changes | Bash Script Execution |
-| `mqtt`            | publishes infos to an MQTT server                                             | Json                  |
-| `websocket`       | opens a websocket port as server                                              | Json                  |
+| `mqtt`            | publishes infos to an MQTT server                                             | JSON                  |
+| `websocket`       | opens a websocket port as server                                              | JSON                  |
 | `osc`             | sends OSC messages to a server                                                | OSC Message Type      |
 | `udp`             | sends UDP messages to a server                                                | String                |
 | `heatmap`         | writes heatmap images to the file system                                      | JPEG                  |
 | `flowmap`         | writes flowmap images to the file system                                      | JPEG                  |
 | `packedfile`      | writes tracking data in packed object format to the file system               | pkf                   |
-| `packedwebsocket` | opens a websocket port as server                                              | pkf                   |
-| `lua`             | calls lua script for observer evaluation                                      | Lua Script Execution  |
+| `packedwebsocket` | opens a websocket port as a server                                            | pkf                   |
+| `lua`             | calls Lua script for observer evaluation                                      | Lua Script Execution  |
 
 #### Observer Names
 
@@ -48,19 +48,19 @@ Set observer parameter `@verbose=true` to print observer debug information on th
 
 #### Observer Common Parameter
 
-These parameter are common to all observers:
+These parameters are common to all observers:
 
 | Parameter            | Type                    | Description                                                                                                           |
 |:-------------------- |:----------------------- |:--------------------------------------------------------------------------------------------------------------------- |
 | `verbose`            | bool                    | print observer debug information on the console                                                                       |
-| `reporting`          | bool                    | switch on or off reporting of values                                                                                  |
+| `reporting`          | bool                    | switch on or off value reporting                                                                                      |
 | `fullFrame`          | bool                    | `true`: all frame information is reported within one message<br>`false`: split frame information in separate messages |
 | `continuous`         | bool                    | `true`: report values every frame<br>`false`: report value only on value change                                       |
-| `regions`            | comma separated strings | regions the observer is applied to                                                                                    |
+| `regions`            | comma separated strings | regions the observer is subscribed to                                                                                 |
 | `regionCentered`     | bool                    | `true`: report positions relative to the region center                                                                |
 | `reportDistance`     | float                   | if not in `continuous` mode, report *move* only if position change is larger than `reportDistance`                    |
 | `maxFPS`             | float                   | maximum frame rate in which reports happen                                                                            |
-| `smoothing`          | float                   | smoothing weight for positional and size values [0..1]. the larger, the smoother, (default=0)                         |
+| `smoothing`          | float                   | smoothing weight for positional and size values [0..1]; with larger being smoother, (default=0)                       |
 | `showSwitchStatus`   | bool                    | `true`: current switch value for observer regions will be shown in UI                                                 |
 | `showCountStatus`    | bool                    | `true`: current count value for observer regions will be shown in UI                                                  |
 | `aliveTimeout`       | float                   | time frequency in sec for alive signal                                                                                |
@@ -68,35 +68,35 @@ These parameter are common to all observers:
 | `runMode`            | string                  | set by `StartServer.sh` with the current run mode                                                                     |
 | `alwaysOn`           | bool                    | `true`: observer will never be stopped                                                                                |
 | `operationalDevices` | string                  | comma separated list of device names necessary for this observer to function correctly                                |
-| `scheme`             | string                  | sheme definition                                                                                                      |
+| `scheme`             | string                  | scheme definition                                                                                                      |
 | `schemeFile`         | string                  | file with the scheme definition                                                                                       |
 
 #### Regions
 
-Observers can be restricted to regions, which are defined as a comma separated list of region names, e.g. @regions='Region1,Region2,Region3'
+Observers can be restricted to regions which are defined as a comma separated list of region names, e.g. @regions='Region1,Region2,Region3'
 
-Enclose in ' ', if names contain spaces: `@regions='Region 1,Region 2,Region 3'`
+Enclose in ' ' if names contain spaces: `@regions='Region 1,Region 2,Region 3'`
 
 Several Regions can be united by assigning them a region name: `@regions=Region1,Region2,Region3=UnitedRegion`
 
 #### Multiple Parameter
 
-Multiple parameter can be combined in a single statement:
+Multiple parameters can be combined in a single statement:
 `@{type=bash,name=SomeName,script=SwitchAudio.sh,regions='Region1,Region2,Region3'}`
 
 ### Filter
 
-Filter define the data fields which a observer should take into account. A filter is a comma separated list of tags preceeded with a colon:
+Define a filter for the data fields which an observer should take into account. A filter is a comma separated list of tags preceded with a colon:
 
-             `:switch,region`
+`:switch,region`
 
 Optionally a tag can have an alias which is a replacement for the tag name when the tag name is reported:
 
-            `:timestamp=ts,action=running,start=true,stop=false`
+`:timestamp=ts,action=running,start=true,stop=false`
 
 ### Example
 
-A full command line:
+A full command line example:
 
 ```console
 > ./lidarTool +d 0 +track +observer :switch,region @{type=bash,name=myObserver,script=SwitchAudio.sh,regions='Region1,Region2,Region3'}
@@ -108,7 +108,7 @@ A full command line:
 
 If you use `lidarAdmin` to manage your LiDARs, put your observer definitions in a text file `observer.txt` in the configuration directory. The script `StartServer.sh` sources the files `observer.txt `and `conf/observer.txt` if they exist.
 
-Example of a `observer.txt`:
+Example of an `observer.txt`:
 
 ```console
 # add a osc observer
@@ -120,19 +120,19 @@ observer+=(+observer @type=bash :switch,region @name=my_switch @script=$conf/Swi
 
 ## Configuration File
 
-The definition of observers via the command line can quickly become very unwieldy and confusing. Therefore observers can also be defined in a configuration file. At program start only must be indicated that the observer definition via configuraion file is to be used.
+The definition of observers via the command line can quickly become very unwieldy and confusing, therefore observers can also be defined in a configuration file. When starting lidartool, you only need to specify that the observer definition is to be read from the configuration file.
 
-The observer configuration file is: ``conf/observer.json``
+The observer configuration file is: `conf/observer.json`
 
-There are operations for creating, deleting, renaming observers, and set observer parameters. Like in the CLI certain parameters have special meanings like ``type``, ``name``etc.
+There are operations to create, delete, and rename observers as well as set observer parameters. Like in the CLI, certain parameters have special meanings such `type`, `name`, etc.
 
 #### Use Observers
 
-To use the observer's configuration file start lidarTool with the option ``+useObservers``
+To use the observer's configuration file start lidarTool with the option `+useObservers`
 
 #### Create and Set Observer Parameters
 
-Set observer parameters with ``+setObserverValues`` followed by the *name* of the observer and observer parameters in the same format as in the command line. It creates the observer if it does not already exist:
+Set observer parameters with `+setObserverValues` followed by the *name* of the observer and observer parameters in the same format as on the command line. The observer will be created if it does not already exist:
 
 ```console
 > ./lidarTool +setObserverValues myObserver :switch,region @{type=bash,script=SwitchAudio.sh,regions='Region1,Region2,Region3'}
@@ -187,11 +187,11 @@ To delete a single observer parameter ``+removeObserverValue observerName parame
 |:---- |:-------------- |:------------------------------------------ |
 | file | @file=fileName | file name or template to write log data to |
 
-File names can contain placeholders for date information, formatted in the unix date format (see 'date -h').
+File names can contain placeholders for date information, formatted in the Unix date format (see 'date -h').
 
-The file name `log/log_%Y-%m-%d.log` expands at the 1st of june 2022 to `log/log_2022-06-01.log`. If a date dependend file name changes with the next log entry, a new file is created. Thus one can create log files on a daily or monthly basis.
+The file name `log/log_%Y-%m-%d.log` expands at the 1st of June 2022 to `log/log_2022-06-01.log`. If a date-dependent file name changes with the next log entry, a new file is created. Thus one can create log files on a monthly or daily basis.
 
-File names are formatted in the unix date format (see 'date -h'). The given file names can be a real file name or a synonym:
+The given file names can be a real file name or a synonym:
 
 ```console
   monthly    synonym for '%Y-%m'
@@ -206,12 +206,12 @@ Example:
 ```console
 > date
 Fr 18. Mär 09:55:43 CET 2022
-myRaspi> ./lidarTool +d 0 +track +observer :timestamp,action,start,stop,object,enter,move,leave,id,x,y @type=file @file=log/log_%daily.log 
+> ./lidarTool +d 0 +track +observer :timestamp,action,start,stop,object,enter,move,leave,id,x,y @type=file @file=log/log_%daily.log 
 ```
 
 Will create log files like log/log_2022-03-18.log, log/log_2022-03-19.log, log/log_2022-03-20.log ...
 
-Text log files are stored line by line in json format:
+Text log files are stored line by line in JSON format:
 
 ```console
 {"timestamp":1644302992879,"action":"start"}
@@ -224,10 +224,10 @@ Text log files are stored line by line in json format:
 {"timestamp":1644302997591,"action":"stop"}
 ```
 
-The timestamp is in milliseconds since january 1, 1970. To convert it in a readable time format, use the unix date command and remove the last three digits of the timestamp. This is the timestamp in seconds:
+The timestamp is in milliseconds since January 1, 1970. To convert it in a readable time format, use the Unix date command and remove the last three digits of the timestamp. This is the timestamp in seconds:
 
 ```console
-myRaspi> date --date='@1644302992'
+> date --date='@1644302992'
 Di  8 Feb 2022 07:49:52 CET
 ```
 
@@ -256,14 +256,14 @@ See type=file section for File name placeholders.
 |      | @switch=true               | Execute Script on existence of object change      |
 |      | @scriptParameter="p0 p1.." | Additional application specific static parameters |
 
-Executes a bash script when the count of people or the occupation changes.
+Executes a bash script when the person count or the occupation changes.
 
 ### OSC Observer: @type=osc
 
-| Type | Parameter                    | Description                                            |
-|:---- |:---------------------------- |:------------------------------------------------------ |
-| osc  | @url=[osc[.tcp]://]host:port | url to send OSC messages to                            |
-|      | @version=versionstring       | versionstring is used as prefix for the adress pattern |
+| Type | Parameter                    | Description                                               |
+|:---- |:---------------------------- |:--------------------------------------------------------- |
+| osc  | @url=[osc[.tcp]://]host:port | url to send OSC messages to                               |
+|      | @version=versionstring       | versionstring is used as a prefix for the address pattern |
 
 Examples:
 
@@ -272,7 +272,7 @@ Examples:
 @url=osc://localhost:5000 # OSC over UDP send to host localhost port 5000
 @url=osc.tcp://localhost:5000 # OSC over TCP send to host localhost port 5000
 
-@version=v2 # /v2 prefixes the adress pattern (e.g. /frame xxx  changes to /v2/frame xxx)
+@version=v2 # /v2 prefixes the address pattern (e.g. /frame xxx  changes to /v2/frame xxx)
 ```
 
 ### UDP Observer: @type=udp
@@ -307,20 +307,20 @@ Examples:
 
 The url has the format: `[user[:topic]@]hostname[:port]` 
 
-For thingsboard `user` is the device access token
+For thingsboard, `user` is the device access token
 
 The `topic` defaults to *v1/devices/me/telemetry*, the `port` to MQTT default port *1883*.
 
 Examples:
 
 ```console
-# Send thingsboard telemetry to host thingsboard.domain.com, device with access token 7GTdpHQjauzQ9RhQdCXh, use non standart port 9876 and topic "my/telemetry"
+# Send thingsboard telemetry to host thingsboard.domain.com, device with access token 7GTdpHQjauzQ9RhQdCXh, use non standard port 9876 and topic "my/telemetry"
 @url=7GTdpHQjauzQ9RhQdCXh:my/telemetry@thingsboard.domain.com:9876
 
-# Send thingsboard telemetry to host thingsboard.domain.com, device with access token 7GTdpHQjauzQ9RhQdCXh, use standart port 1883 and default topic "v1/devices/me/telemetry"
+# Send thingsboard telemetry to host thingsboard.domain.com, device with access token 7GTdpHQjauzQ9RhQdCXh, use standard port 1883 and default topic "v1/devices/me/telemetry"
 @url=7GTdpHQjauzQ9RhQdCXh@thingsboard.domain.com
 
-# Send MTQQ message with topic "my/telemetry", use standart port 1883 and default topic "v1/devices/me/telemetry"
+# Send MTQQ message with topic "my/telemetry", use standard port 1883 and default topic "v1/devices/me/telemetry"
 @url=my/telemetry@thingsboard.domain.com
 ```
 
@@ -330,56 +330,56 @@ Examples:
 |:------ |:--------------- |:--------------- |
 | script | lua script file | the script file |
 
-inside the lua script, function `init()` is called on script loading.
+Inside the Lua script, function `init()` is called on script loading.
 
 ```
 function init()
-   print( "init lua" )
-   lastcount = -1
+    print( "init lua" )
+    lastcount = -1
 end
 ```
 
-functions `start( timestamp )` and `stop( timestamp )` are called on start and stop of observers.
+Functions `start( timestamp )` and `stop( timestamp )` are called on observer start and stop events.
 
 ```
 function start( timestamp )
-   print( obsv.timestamp('%c',timestamp) .. ": " .. tostring(timestamp) .. " start lua observer" )
+    print( obsv.timestamp('%c',timestamp) .. ": " .. tostring(timestamp) .. " start lua observer" )
 end
 
 function stop( timestamp )
-   print( obsv.timestamp('%c',timestamp) .. ": " .. tostring(timestamp) .. " stop lua observer" )
+    print( obsv.timestamp('%c',timestamp) .. ": " .. tostring(timestamp) .. " stop lua observer" )
 end
 ```
 
-function  `observe( timestamp )` is called on each evaluation of the observer.
+Function  `observe( timestamp )` is called on each evaluation of the observer.
 
 ```
 function observe( timestamp )
-   print( obsv.timestamp('%c',timestamp) .. ": observe" )
+    print( obsv.timestamp('%c',timestamp) .. ": observe" )
 
-   for i=obsv.numRegions()-1,0,-1
-   do
-      local objects = obsv.objects( i );
-      local region  = objects:region()
-      print( region )
+    for i=obsv.numRegions()-1,0,-1
+    do
+        local objects = obsv.objects( i );
+        local region  = objects:region()
+        print( region )
 
-      for o=objects:size()-1,0,-1
-      do
-         local object = objects[o]
-         if object:hasMoved() then
-             print( "objects(" .. object:id() .. ")  x = " .. object:x() .. ", y = " .. object:y() )
-             object:moveDone()
-          end
-      end
+        for o=objects:size()-1,0,-1
+        do
+            local object = objects[o]
+            if object:hasMoved() then
+                print( "objects(" .. object:id() .. ")  x = " .. object:x() .. ", y = " .. object:y() )
+                object:moveDone()
+            end
+        end
 
-      print( "switch(" .. region .. "): " .. tostring( objects:switch() ) )
+        print( "switch(" .. region .. "): " .. tostring( objects:switch() ) )
 
-      local count = objects:count()
-      if count ~= lastcount then
-          print( "count(" .. region .. "): " .. tostring( objects:count() ) )
-          lastcount = count
-      end
-   end
+        local count = objects:count()
+        if count ~= lastcount then
+            print( "count(" .. region .. "): " .. tostring( objects:count() ) )
+            lastcount = count
+        end
+    end
 end
 ```
 
@@ -387,7 +387,7 @@ See [lua](../lua/README.md) for details.
 
 ## Filter
 
-Filter define the layout and data fields of a message. The filter definition starts with a `:` followed by the filter tags to be reported. If a filter tag is set, the value of the tag refering to is reported with the given name. If for example *size* is set, then the value of *size* is reported with the parameter name `size`.
+Define a filter for the layout and data fields of a message. The filter definition starts with a `:` followed by the filter tags to be reported. If a filter tag is set, the value of the tag referring to the parameter is reported with the given name. If for example *size* is set, then the value of *size* is reported with the parameter name `size`.
 
 Example:
 
@@ -396,7 +396,7 @@ Example:
 :frame,frame_id,object,id,x,y,size
 ```
 
-In Json format a message looks similar to:
+In JSON format a message looks similar to:
 
 ```
 {"frame_id":158,"object":{"id":"1","x":0.523,"y":-1.849,"size":0.72}}
@@ -420,10 +420,10 @@ Results in:
 Or in OSC messages like:
 
 ```console
-> scdump osc.udp://:5000
+> oscdump osc.udp://:5000
 ```
 
-For dropping the tag names in OSC assign empty aliases:
+For dropping the tag names in OSC, assign empty aliases:
 
 ```
 :frame,frame_id=fid,object=blob,id=,x=,y=,size=
@@ -456,16 +456,16 @@ These filter definitions will have exactly the same result:
 
 | Tag                | Description                                                                                      |
 |:------------------ |:------------------------------------------------------------------------------------------------ |
-| frame              | in OSC a single message with *frame* as address pattern indicating the next frame                |
-| frame_end          | in OSC a single message with *frame_end* as address pattern indicating the end of the frame      |
+| frame              | in osc, a single message with *frame* as address pattern indicating the next frame               |
+| frame_end          | in osc, a single message with *frame_end* as address pattern indicating the end of the frame     |
 | frame_id           | report *frame_id*, a sequential number counting up with each tracking frame, wraps at 16383 to 0 |
-| timestamp          | the timestamp of the message in millisec unix time (see unix `date` command)                     |
-| num_objects        | report the number ob objects detected                                                            |
+| timestamp          | the timestamp of the message in millisecond unix time (see unix `date` command)                  |
+| num_objects        | report the number of objects detected                                                            |
 | object             | indicates that object parameters should be reported                                              |
-| objects            | indicates that objects should aggregated/ gouped                                                 |
+| objects            | indicates that objects should aggregated/grouped                                                 |
 | id                 | the object tracking id                                                                           |
 | position           | the object position aggregated                                                                   |
-| x,y,z              | the object position as seperate parameters                                                       |
+| x,y,z              | the object position as separate parameters                                                       |
 | size               | the object size                                                                                  |
 | type               | report the event type, can be *enter*, *leave*, *move*                                           |
 | enter, leave, move | report if the the event matches                                                                  |
@@ -473,9 +473,9 @@ These filter definitions will have exactly the same result:
 | count              | number of objects detected                                                                       |
 | switch             | 0 if no object detected, 1 otherwise                                                             |
 | region             | report the region in which objects are detected                                                  |
-| regions            | indicates that regions should aggregated/ gouped                                                 |
+| regions            | indicates that regions should aggregated/grouped                                                 |
 | alive              | emits 1 every `aliveTimeout` sec                                                                 |
-| operational        | emits the fraction of operational and `requestedDevices` every `aliveTimeout` sec                |
+| operational        | emits the fraction of operational devices and `requestedDevices` every `aliveTimeout` sec        |
 
 ## Explore Filter Tags
 

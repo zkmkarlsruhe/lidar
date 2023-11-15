@@ -1,19 +1,19 @@
 
 # add a json file observer
-#  - creates an entry only, when a person moved more then 75cm
-#  - creates every day a new file $conf/when_moving_*.log
+#  - creates an entry only when a person has moved more then 75cm
+#  - creates a new file daily $conf/when_moving_*.log
 observer+=(+observer @type=file @name=discrete_log :timestamp,action,start,stop,object=person,enter,move,leave,id,x,y,count,lifespan @file=[conf]/when_moving_%daily.log @reportDistance=0.75)
 
 # add a json file observer
-#  - writes continuousely with 1 frames per sec
-#  - creates every hour a new file [conf]/continuous_*.log
-#  - writes timestamp aliased to date in readable format given in unix date notation, in this example %c (the canonical date output) is used
+#  - writes continuousely at 1 frames per sec
+#  - creates a new file hourly [conf]/continuous_*.log
+#  - writes timestamps, aliased to date in unix date notation format, in this example %c (the canonical date output) is used
 #  - reports objects per region
 #  - reports full frame: all information in one line
 observer+=(+observer @type=file @name=continuous_log :timestamp=date@%c,action=running,start=true,stop=false,runmode,object=person,enter,move,leave,uuid,x,y,size,count,lifespan,regions,region @regions=region1,region2,fullmap @file=[conf]/continuous_%hourly.log @maxFPS=1 @fullFrame=true @continuous=true)
 
 # add a proprietary packed file format observer, the output can be read by packedPlayer
 #  - writes continuousely with 15 frames per sec
-#  - creates every day a new file 
+#  - creates a new file daily 
 observer+=(+observer @type=packedfile @name=packed_log @file=[conf]/packed_%daily.pkf @maxFPS=15)
 

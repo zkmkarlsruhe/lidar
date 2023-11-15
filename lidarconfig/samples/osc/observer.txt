@@ -1,4 +1,4 @@
 
-# add a osc observer
+# add an osc observer
 observer+=(+observer @type=osc :frame,frame_id,frame_end,object,move,id,x,y,z,size,region,count @showCountStatus=true @name=my_osc @url=osc.udp://localhost:5000 @regions='myRegion')
 

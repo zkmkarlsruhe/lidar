@@ -199,7 +199,6 @@ do
   if $success ; then
 
       # if successful try again every hour
-
       if [ "$time" == "" ] ; then
 	  time=$(shuf -i 800-2400 -n 1)
 	  sleep $time

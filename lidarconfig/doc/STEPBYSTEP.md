@@ -1,32 +1,32 @@
-# Steps for setting up a complete Client Server System
+# Steps for setting up a complete Client/Server System
 
-## 1. install lidaradmin on your server
+1. Setup Server
 
-2. create a floor plan of your space
+  1. install lidaradmin on your server
 
-3. decide where to place sensord
+  2. create a floor plan of your space
 
-4. create a lidar config on your server
+  3. decide where to place sensors
 
-5. make a simulation with your sensors
+  4. create a lidar config on your server
 
-    Setup real sensors
+  5. make a simulation with your sensors
 
-1. prepare an SD Card for your Pis
+2. Setup Clients
+
+  1. prepare an SD Card for your Pis
+     - copy confix.txt to the SD Card
+     - clone SD Card
+
+  2. for each client node:
    
-   copy confix.txt to the SD Card
+     1. determine MAC Adress
    
-   clone SD Card
-
-2. for each client node:
+     2. entry mac adress in sensorDB.txt
    
-   1. determine MAC Adress
+     3. run sensorDB.sh update
    
-   2. entry mac adress in sensorDB.txt
-   
-   3. run sensorDB.sh update
-   
-   4. place client nodes on location, connect to network, boot
+     4. place client nodes on location, connect to network, boot
 
 3. Define regions
 

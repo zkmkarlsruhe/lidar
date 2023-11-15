@@ -2,11 +2,11 @@
 
 Device name management simplifies the handling of device names. On the one hand, it allows physical devices to be associated with a persistent device name via serial number; on the other hand, nik names facilitate the readability of device names.
 
-Nik names are key value pairs stored in a json file `conf/nikNames.json`.
+Nik names are key value pairs stored in a JSON file `conf/nikNames.json`.
 
 ## Nik Names
 
-A nik name is an alias for a device. It makes dealing with devices more intuitive and on linux it allows binding devices to names depending on their serial number (see section UDEV)
+A nik name is an alias for a device. It makes dealing with devices more intuitive and on Linux it allows binding devices to names depending on their serial number (see section UDEV)
 
 ### Set Nik Name
 
@@ -18,8 +18,7 @@ Assign the nik name *myNikName* to device lidar0. *myNikName* can now be used as
 
 ### Set Nik Name by Serial Number
 
-Sets the nik name for a device by its serial number 
-Assign the nik name *myNikName* to device lider*SERIALNUMBER*. *myNikName* can now be used as alias for the lidar with the serial number, independend of the serial port it is assigned to:
+Set the nik name *myNikName* to device lider*SERIALNUMBER*. *myNikName* can now be used as alias for the lidar with the serial number, independent of the serial port it is assigned to:
 
 ```console
 > ./lidarTool +setNikName myNikName lidarC8B399F6C9E59AD5C5E59CF734613415
@@ -27,7 +26,7 @@ Assign the nik name *myNikName* to device lider*SERIALNUMBER*. *myNikName* can n
 
 ### List Nik Names
 
-List all nik names defined:
+List all nik names currently defined:
 
 ```console
 > ./lidarTool +listNikNames
@@ -71,7 +70,7 @@ key=remoteSensor
  name=virtual:192.168.1.35:9090 device=virtual:192.168.1.35:9090
 ```
 
-The name remoteSensor can now be used as shortcut for the virtual device:
+The name "remoteSensor" can now be used as a shortcut for the virtual device:
 
 ```console
 > ./lidarTool +d remoteSensor .....
@@ -111,7 +110,7 @@ This sets the nik name lidar5 for the serial number of the device plugged in /de
 lidarCE8E99F6C9E59AD5C5E59CF7325C3415 lidar5
 ```
 
-Replugging the serial device would lead to this device assignment:
+Unplugging and replugging the serial device would lead to this device assignment:
 
 ```console
 > ls -l /dev/lidar*
@@ -119,8 +118,10 @@ lrwxrwxrwx 1 root root 7 Mär 15 17:30 /dev/lidar5 -> ttyUSB0
 lrwxrwxrwx 1 root root 7 Mär 15 17:30 /dev/lidarCE8E99F6C9E59AD5C5E59CF7325C3415 -> ttyUSB0
 ```
 
-The device with the serial number CE8E99F6C9E59AD5C5E59CF7325C3415 is always assigned to `/dev/lidar5`, independend of to which ttyUSB*X* the device is assingned to.
+The device with the serial number CE8E99F6C9E59AD5C5E59CF7325C3415 is always assigned to `/dev/lidar5`, independent of to which ttyUSB*X* the device is assigned to.
 
-It is good practise to have a use the device names liderN, since the implementation allows shortcuts for these device names.
+It is good practice use the device name liderN format, since the implementation allows shortcuts for these device names.
 
-The RPlidar and the YDLidar series support serial numbers. The LD06/LD19/STL27L and ORADAR MS200 do not support serial numbers. The CP210x USB<->UART bridges used by all of the three manifacturers do not have distinct serial numbers in their delivered state. You can assign serial numbers with the [cp210x-cfg](https://github.com/DiUS/cp210x-cfg) tool and build your own UDEV rules.
+Note: The RPlidar and the YDLidar series support serial numbers while the LD06/LD19/STL27L and ORADAR MS200 do not.
+
+The CP210x USB<->UART bridges used by all of the three manufacturers do not have distinct serial numbers in their delivered state. You can assign serial numbers with the [cp210x-cfg](https://github.com/DiUS/cp210x-cfg) tool and build your own UDEV rules.

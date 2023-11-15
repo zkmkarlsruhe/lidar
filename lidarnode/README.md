@@ -1,18 +1,18 @@
 # lidarnode
 
-This document describes the setup of a client node. A client node virtualizes a physical LiDAR device. It usually uses a small computation unit like Raspberry Pi or similar with a locally connected LiDAR sensor. These units can easily be located in large spaces.
+This document describes the setup of a client node which virtualizes a physical LiDAR device. It usually uses a small embedded computer like Raspberry Pi, Rock Pi S, or similar with a locally connected LiDAR sensor. These units can easily be located in large spaces.
 
-All client nodes differ only in a single config file, where the admin server adress is stored. The role specific data, e.g., the UDP port to send LiDAR data to, is retrieved when the client node registers to the server. During administration and when registering, clients are identified by their MAC adress.
+All client nodes differ only by a single config file, where the admin server address is stored. The role-specific data, e.g., the UDP port to send LiDAR data to, is retrieved when the client node registers on the server. During administration and when registering, clients are identified by their MAC address.
 
 # Install Client Node
 
-## Raspberry Pi and RockPi S
+## Raspberry Pi and Rock Pi S
 
-If you are using Pis as client node computation platform, the operating system and software has to be installed on a SDCard. This SD Card can be cloned for any additional nodes. Follow first the instructions to setup the operation system for a [RaspberryPi](../lidartool/doc/RaspberryPi/README.md) or a [RockPiS](../lidartool/doc/RockPI_S/README.md).
+If you are using Raspberry Pi or ROck Pi S as the client node computation platform, the operating system and software has to be installed on a SD card. This SD card can be setup beforehand and then cloned for any additional nodes. First, follow the instructions to set up the operating system for a [Raspberry Pi](../lidartool/doc/RaspberryPi/README.md) or a [Rock Pi S](../lidartool/doc/RockPI_S/README.md).
 
-## Install lidartool and lidarnode in one go
+## Install lidartool and lidarnode in One Go
 
-cd to this directory and install:
+Change directory to this directory and install:
 ```console
 cd lidar/lidarnode
 ./install/install_script.sh
@@ -22,11 +22,11 @@ cd lidar/lidarnode
 
 Copy the `config.txt` from the admin server to `lidarnode` folder.
 
-You can clone now the SD Card.
+You can now clone the SD card.
 
 ## Register Nodes
 
-When lidarAdmin is running on the remote server, the client node registers after booting. The node should then appear in the `Maintain`- tab in the lidarAdmin user interface
+When lidarAdmin is running on the remote server, the client node registers after booting. The node should then appear in the `Maintain`- tab in the lidarAdmin user interface.
 
 You can manually register the node by:
 
