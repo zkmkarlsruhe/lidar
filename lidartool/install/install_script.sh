@@ -52,7 +52,7 @@ fi
 
 # install dependencies
 
-sudo apt-get -yq install build-essential git cmake automake libtool m4 libx11-dev libjpeg-dev libpng-dev libudev-dev wget libcurl4-openssl-dev curl dnsutils net-tools uuid-dev pkg-config jq bc
+sudo apt-get -yq install build-essential git cmake automake libtool m4 libx11-dev libjpeg-dev libpng-dev libudev-dev libmicrohttpd-dev wget libcurl4-openssl-dev curl dnsutils net-tools uuid-dev pkg-config jq bc
 
 # install optional
 
