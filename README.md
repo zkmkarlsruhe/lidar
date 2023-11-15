@@ -52,7 +52,7 @@ System Requirements
 System OS: Linux
 
 Hardware and OS:
-* Desktop PC, Ubuntu 20.04 Mate
+* Desktop PC with Ubuntu 20.04 Mate
 * Rapberry 3 or 4 with raspios-bullseye
 * [**Radxa Rock Pi S**](https://wiki.radxa.com/RockpiS) with  debian-buster
 
