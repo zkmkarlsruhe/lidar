@@ -57,7 +57,7 @@ Hardware and OS:
 * [**Radxa Rock Pi S**](https://wiki.radxa.com/RockpiS) with  debian-buster
 
 Required packages:
-* g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config jq bc
+* g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config ssh-askpass jq bc
 
 Optional:
 * libmosquitto-dev for MQTT support
