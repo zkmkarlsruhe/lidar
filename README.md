@@ -57,7 +57,7 @@ Required packages:
 Optional:
 * libmosquitto-dev for MQTT support
 * libwebsockets-dev for websocket support
-* liblo-dev for OSC support
+* liblo-dev, liblo-tools for OSC support
 * lua5.3, liblua5.3-dev, luarocks for Lua support
 
 # Installation
