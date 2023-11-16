@@ -73,27 +73,14 @@ If you want to install on a **Raspberry Pi 3 or 4**, follow these [instructions]
 
 If you want to install on a **Radxa Rock Pi S**, follow these [instructions](doc/RockPI_S/README.md).
 
-## 1. Clone Repository
-
-Clone this repository
-
-```
-git clone git.......
-```
-
-cd to path of cloned repository:
+## Install and Build software
 
 ```console
 cd lidar/lidartool
-```
-
-## 2. Install and Build software
-
-```console
 ./install/install_script.sh
 ```
 
-Type in root password when needed.
+Type in admin password when needed.
 
 If you need support for any of MQTT, Lua Scripting Language, OSC or Websockets, append them selectively as options:
 
