@@ -67,6 +67,8 @@ Optional:
 
 # Installation
 
+lidartool, lidaradmin and lidarnode provide install scripts, which install required packages if needed. Please execute them as normal user and enter the admin password when required.
+
 ## Set up Single Computer Configuration
 
 If you want to use just **one or a few  LiDAR sensors** attached to a single computer:
