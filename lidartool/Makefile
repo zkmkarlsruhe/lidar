@@ -251,7 +251,7 @@ $(LIBDIR)lidarTrack.a: $(CIMGDIR) $(OBJDIR)lidarTrack.o $(OBJDIR)jsonTool.o Trac
 	$(AR) rcvs $@ $(OBJDIR)lidarTrack.o $(OBJDIR)jsonTool.o
 	ranlib $@
 
-$(OBJDIR)lidarKit.o: $(CIMGDIR) $(RPLIDARLIB)
+$(OBJDIR)lidarTrack.o $(OBJDIR)lidarKit.o $(OBJDIR)lidarVirtDriver.o: $(CIMGDIR) $(RPLIDARLIB)
 
 $(OBJDIR)lidarTool.o: $(LIBHTTPSERVERLIB) $(OBJDIR)lidarKit.o
 
