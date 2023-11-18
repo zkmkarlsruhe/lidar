@@ -42,7 +42,7 @@ lidar/
 
 - [**lidarnode**](lidarnode): contains files for defining a LiDAR client node. Makes use of *lidartool* and *lidaradmin*.
 
-- [**lidarconfig**](lidarconfig): contains tools to a create and edit a lidar configuration and contains samples for use cases.
+- [**lidarconfig**](lidarconfig): contains tools to create and edit a lidar configuration and contains samples for use cases.
 
 - **lidarconfig-...**: are created for each configuration (... is the configuration name) and contain configuration specific scripts and data
 
@@ -57,7 +57,7 @@ Hardware and OS:
 * [**Radxa Rock Pi S**](https://wiki.radxa.com/RockpiS) with  debian-buster
 
 Required packages:
-* g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev curl libudev-dev uuid-dev pkg-config ssh-askpass jq bc
+* g++, std=c++17, cmake, automake, libtool, m4, wget, curl, libcurl4-openssl-dev, libudev-dev, uuid-dev, pkg-config, ssh-askpass, jq, bc
 
 Optional:
 * libmosquitto-dev for MQTT support
@@ -67,7 +67,7 @@ Optional:
 
 # Installation
 
-lidartool, lidaradmin and lidarnode provide install scripts, which install required packages if needed. Please execute them as normal user and enter the admin password when required.
+lidartool, lidaradmin and lidarnode provide install scripts, which install required packages if needed. Please execute them as normal user and enter the admin password when asked for.
 
 ## Set up Single Computer Configuration
 
@@ -112,11 +112,11 @@ For setting up the **server**, clone this repository and:
 #### 4. Set up each Physical Nodes
 
 - Prepare client nodes with an SD card cloned from the SD card prepared in step 1. Identify the nodes MAC addresses.
-- Place nodes in the real space and enter the MAC address in the sensor definition file.
+- Place nodes in the real space and enter the MAC address in the sensor definition file on the server.
 
 # Examples
 
-See [samples](lidarconfig/samples/README.md) for creating executable examples.
+See [samples](lidarconfig/samples) for creating executable examples.
 
 # The Intelligent Museum
 
