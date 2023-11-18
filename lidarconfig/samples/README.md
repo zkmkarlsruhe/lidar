@@ -33,7 +33,7 @@ Each sample has a file ***init_config.sh***. Read file content for more informat
 To check out the osc sample and assign it a different name, type:
 
 ```console
-./editConfig.sh create myosc samples/osc
+./editConfig.sh create myosc init samples/osc
 ```
 
 Change to the newly created configuration directory:
