@@ -277,7 +277,7 @@ notification( const char *tags, const char *format, ...  )
 
     system( cmd.c_str() );
   }
-  else
+  else if ( g_Verbose > 0 )
   {
     va_list args;
     va_start( args, format );
