@@ -433,8 +433,6 @@ if [ "$initDir" != "" ] ; then
     fi
 fi
 
-exit 0
-
 if [ "$regionName" != "" ] ; then
     $lidartool/lidarTool +conf $conf +setRegion $regionName $@
 fi
