@@ -3520,10 +3520,12 @@ public:
 
       log( withRunningMode("START by API").c_str() );
 
-      if ( !g_IsStarted )
-	TrackGlobal::notification( "start", "message=\"Start by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
-
       webMutex.lock();
+      
+      if ( !g_IsStarted )
+      { g_IsStarted = true;
+	TrackGlobal::notification( "start", "message=\"Start by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+      }
       
       LidarDeviceList devices( g_Devices.allDevices() );
 
@@ -3531,11 +3533,6 @@ public:
 
       for ( int d = 0; d < devices.size(); ++d )
       {
-//	devices[d]->readEnv();
-//	devices[d]->readMatrix();
-
-//    	devices[d]->setMotorState( true );
-
 	devices[d]->open();
 	
 	sendToInVirtual( *devices[d], "/start" );
@@ -3543,7 +3540,6 @@ public:
 	
       if ( g_DoTrack )
 	g_Track.start( playerTimeStamp() );
-      g_IsStarted = true;
 
       webMutex.unlock();
       
@@ -3594,17 +3590,18 @@ public:
 //  printf( "stop_resource\n" );
 
       log( "STOP by API" );
-      if ( g_IsStarted )
-	TrackGlobal::notification( "stop", "message=\"Stop by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
 
       webMutex.lock();
+      
+      if ( g_IsStarted )
+      { g_IsStarted = false;
+	TrackGlobal::notification( "stop", "message=\"Stop by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+      }
       
       LidarDeviceList devices( g_Devices.allDevices() );
 
       for ( int d = 0; d < devices.size(); ++d )
       {
-//	devices[d]->setMotorState( false );
-
 	sendToInVirtual( *devices[d], "/stop" );
 
 	devices[d]->close();
@@ -3612,8 +3609,7 @@ public:
       
       if ( g_DoTrack )
 	g_Track.stop( playerTimeStamp() );
-      g_IsStarted = false;
-
+ 
       stopFailures();
 
       webMutex.unlock();
