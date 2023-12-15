@@ -540,7 +540,19 @@ body, image {
             if ( hasLidar )
               $('#movableDevices').replaceWith( data );
 
-           $("[content^=moveDevice]").each(function(){ 
+            $("[id^=moveGroup]").each(function(){ 
+               let group = $(this).prop('name');
+               let isAll = $(this).prop('id').startsWith( "moveGroupAll" );
+               $(this).click(function(){
+                   $("[content^=moveDevice][alt=\""+group+"\"]").each(function(){ 
+                     $(this).prop('checked',isAll);
+                     updateControl( 'device' );
+                     propagateChecked( this );
+                   });
+               });
+            });
+
+            $("[content^=moveDevice]").each(function(){ 
                  $(this).change(function(){
                  propagateChecked( this );
                  if ( $(this).prop('checked') )
