@@ -698,7 +698,14 @@ setNikName( const char *key, const char *nikName )
 
 static bool
 writeBlueprints()
-{ return TrackGlobal::WriteKeyValues( blueprints, blueprintsFileName.c_str() );
+{
+  float x, y;
+  if ( !blueprints.get( "x", x ) )
+    blueprints.setDouble( "x", 0.0 );
+  if ( !blueprints.get( "y", y ) )
+    blueprints.setDouble( "y", 0.0 );
+
+  return TrackGlobal::WriteKeyValues( blueprints, blueprintsFileName.c_str() );
 }
 
 static bool

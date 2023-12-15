@@ -324,16 +324,7 @@ body, image {
           showDevices += "&" + $(this).attr('content') + "=" + $(this).prop('checked');
         });
 
-      if ( useBlueprints ) {
-        $.ajax({ url: "get?bpTsf=true",
-          success: function(data){
-            bsx = data.bptsf[0];
-            bsy = data.bptsf[1];
-            btx = data.bptsf[2];
-            bty = data.bptsf[3];
-          }
-        }); 
-      }
+      updateBlueprintPos();
 
       if ( !imageInProgress )
       {
@@ -921,6 +912,20 @@ body, image {
       bpCanvas.setAttribute('height', dpi * window.screen.height);
     }
 
+    function updateBlueprintPos() {
+      if ( useBlueprints ) {
+        $.ajax({ url: "get?bpTsf=true",
+          success: function(data){
+            bsx = data.bptsf[0];
+            bsy = data.bptsf[1];
+            btx = data.bptsf[2];
+            bty = data.bptsf[3];
+            updateBlueprints( bsx, bsy, btx, bty );
+          }
+        }); 
+      }
+    }
+
     function updateBlueprints( sx, sy, tx, ty ) {
 
       if ( !bpContext )
@@ -1288,7 +1293,7 @@ body, image {
       $('.reloadBlueprint').click(function(){
          if ( confirm("Reload Blueprint ?") == true) {
             $.ajax({ url: 'blueprint?reload=true',
-                success: function(data){ hasBlueprintChanges = false; blueprintImg.src = 'blueprint?t=' + new Date().getTime(); } 
+                success: function(data){ hasBlueprintChanges = false; blueprintImg.src = 'blueprint?t=' + new Date().getTime(); updateBlueprintPos(); } 
             });
          }
       });
