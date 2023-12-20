@@ -90,6 +90,9 @@ inline std::string timestampString( const char *templat, uint64_t timestamp, boo
 inline bool
 replace( std::string &str, const std::string &from, const std::string &to )
 {
+  if ( from == to )
+    return false;
+
   size_t start_pos = str.find( from );
   if ( start_pos == std::string::npos )
     return false;
