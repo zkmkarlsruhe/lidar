@@ -536,7 +536,14 @@ public:
 
     rgbImg img( calcImage(context) );
     
-    return img.save( fileName );
+    bool result = img.save( fileName );
+
+    if ( !result )
+      error( "TrackableImageObserver(%s): saving image file %s", name.c_str(), fileName );
+    else if ( verbose )
+      info( "TrackableImageObserver(%s): save: %s", name.c_str(), fileName );
+
+    return result;
   }
 
   bool saveTimed( uint64_t timestamp=0, bool force=true )
@@ -560,9 +567,6 @@ public:
         }
 	else if ( ctx.lastFileName != fileName )
         {
-	  if ( verbose )
-	    error( "TrackableImageObserver(%s): save: %s\n", name.c_str(), ctx.lastFileName.c_str() );
-	
 	  if ( ctx.obsvImg != NULL )
           { save( ctx.lastFileName.c_str(), &ctx );
 	    delete ctx.obsvImg;
