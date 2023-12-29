@@ -46,7 +46,7 @@ You can use a guided edit of the **`config.txt`** file:
 
 * `useNodes=bool`  *true* if devices are virtualized by nodes, *false* if devices are connected locally. If nodes are used:
   
-  - `server=myserver.mydomain.de` Server Adress
+  - `server=myserver.mydomain.de` Server Address
   
   - `portBase=40` Prefix to construct the port number: port=portBase|portOffset, e.g. portBase=40, portOffset=013 -> port=40013
   
@@ -74,7 +74,7 @@ To set one of the default obstacle Images for simulation of persons in the space
 
 # sensorDB (File sensorDB.txt)
 
-The file `sensorDB.txt` interfaces between physical nodes identified by their MAC adress and their role in the lidar system. Node name are combinations of field values of an entry:
+The file `sensorDB.txt` interfaces between physical nodes identified by their MAC address and their role in the lidar system. Node name are combinations of field values of an entry:
 
 | Group Name | Lidar Model | Nr in Group | Port Offset | enabled (+/-) | Mac               |
 | ---------- | ----------- | ----------- | ----------- | ------------- | ----------------- |
@@ -104,7 +104,7 @@ For updating **Physical Nodes** related files:
 
 The file `nodeDB.txt` stores information of physical nodes and is automatically managed by `lidarAdmin`. Do not change it by hand.
 
-When nodes register with MAC and IP adresses, they get their UDP port offset and lidar type.
+When nodes register with MAC and IP addresses, they get their UDP port offset and lidar type.
 
 | MAC               | IP           | Port Offset | Login User | Pi Model |
 | ----------------- | ------------ | ----------- | ---------- | -------- |
