@@ -1184,9 +1184,7 @@ TrackableRegion::setKeyValueMap( KeyValueMap &descr )
 
   descr.get( "x", x );
   descr.get( "y", y );
-  descr.get( "w", width );
   descr.get( "width", width );
-  descr.get( "h", height );
   descr.get( "height", height );
   descr.get( "edge", edgeName );
   descr.get( "shape", shapeName );
@@ -1228,8 +1226,8 @@ TrackableRegion::toKeyValueMap( KeyValueMap &descr )
   
   descr.setDouble( "x",      x );
   descr.setDouble( "y",      y );
-  descr.setDouble( "w",      width );
-  descr.setDouble( "h",      height );
+  descr.setDouble( "width",  width );
+  descr.setDouble( "height", height );
   
   descr.set      ( "edge",   g_RegionsEdgeName[edge].c_str() );
   descr.set      ( "shape",  g_RegionsShapeName[shape].c_str() );
