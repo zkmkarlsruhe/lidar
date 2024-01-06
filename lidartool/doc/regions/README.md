@@ -80,7 +80,7 @@ To finish editing press the "*Done Regions*" button on the bottom right to close
 
 **Note:** This does not save the edited regions in the config file, but just closes the editor.
 
-## Save Canges
+## Save changes
 
 To Save the changes in the config file, choose "*Save Regions*" from the "*Regions*" menu and confirm in the confirmation dialog.
 

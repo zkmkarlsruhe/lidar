@@ -489,7 +489,7 @@ Start tracking with:
 
 Then open the URL [http://localhost:8080/websocketClientExample.html](http://localhost:8080/websocketClientExample.html) in a web browser. Press *Reload* if you restart the lidar tool.
 
-If you want to explore behaviour with regions, define a region *Region1* and start tracking with:
+If you want to explore behavior with regions, define a region *Region1* and start tracking with:
 
 ```
 +track +observer @type=websocket :frame,frame_id,objects,type,enter,move,leave,regions,region,x,y,z,size,id,lifespan,count @{name=WS,port=5000,regions='Region1'}

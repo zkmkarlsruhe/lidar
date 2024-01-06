@@ -20,9 +20,9 @@
 
   2. for each client node:
    
-     1. determine MAC Adress
+     1. determine MAC Address
    
-     2. entry mac adress in sensorDB.txt
+     2. entry mac address in sensorDB.txt
    
      3. run sensorDB.sh update
    
