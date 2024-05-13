@@ -471,7 +471,7 @@ ObsvObjects_regionHeight( lua_State *lua )
 }
 
 int
-ObsvObjects_object( lua_State *lua )
+ObsvObjects_at( lua_State *lua )
 {
   getInstance( objects, lua, ObsvObjects );
 
@@ -480,6 +480,19 @@ ObsvObjects_object( lua_State *lua )
   std::advance(iter, index);
 
   ObsvObject *obj = &iter->second;
+  registerUserDataInstance( lua, obj, ObsvObject );
+
+  return 1;
+}
+
+int
+ObsvObjects_byId( lua_State *lua )
+{
+  getInstance( objects, lua, ObsvObjects );
+
+  int index = luaL_checkinteger( lua, 2 );
+
+  ObsvObject *obj = &(*objects)[index];
   registerUserDataInstance( lua, obj, ObsvObject );
 
   return 1;
@@ -506,7 +519,9 @@ LuaFunc_Reg ObsvObjectsFunctions[] =
   { "gateCount", (Lua_CFunction)ObsvObjects_gateCount },
   { "avgLifespan", (Lua_CFunction)ObsvObjects_avgLifespan },
   { "operational", (Lua_CFunction)ObsvObjects_operational },
-  { "object", (Lua_CFunction)ObsvObjects_object },
+  { "byId", (Lua_CFunction)ObsvObjects_byId },
+  { "at", (Lua_CFunction)ObsvObjects_at },
+  { "__index", (Lua_CFunction)ObsvObjects_at },
   { NULL, NULL }
 };
 
