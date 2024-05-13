@@ -141,6 +141,7 @@ static KeyValueMap	 		blueprints;
 static std::string			blueprintsFileName;
 static std::string			groupsFileName;
 static std::string			g_Config;
+static std::string			g_Conf;
 static std::string			g_InstallDir( "./" );
 static std::string			g_RealInstallDir( "./" );
 static std::string			g_HTMLDir( "./html/" );
@@ -550,7 +551,8 @@ testConfigDir( std::string &dir )
   testDir += "/";
   
   LidarDevice::configDir = testDir;
-  g_Config = conf;
+  g_Conf = g_Config = conf;
+  rtrim( g_Conf, "/" );
 
   return true;
 }
@@ -1328,8 +1330,6 @@ reportFailure( LidarDevice &device, std::string &reason )
     log( "DEVICE Failure on device '%s' Reason: %s", device.getNikName().c_str(), reason.c_str() );
   }
 
-  std::string conf( g_Config );
-  rtrim(conf, "/");
 
   std::string url( inVirtualUrl(device) );
   if ( url.empty() )
@@ -1343,7 +1343,7 @@ reportFailure( LidarDevice &device, std::string &reason )
   }
 
   char msg[4096];
-  sprintf( msg, "deviceName=%s sensorIN=\"%s\" reason=\"%s\" conf=%s runMode=%s url=\"%s\" verbose=%s", device.getNikName().c_str(), device.sensorIN.c_str(), reason.c_str(), conf.c_str(), g_RunningMode.c_str(), url.c_str(), g_Verbose?"true":"false" );
+  sprintf( msg, "deviceName=%s sensorIN=\"%s\" reason=\"%s\" conf=%s runMode=%s url=\"%s\" verbose=%s", device.getNikName().c_str(), device.sensorIN.c_str(), reason.c_str(), g_Conf.c_str(), g_RunningMode.c_str(), url.c_str(), g_Verbose?"true":"false" );
 
   TrackGlobal::notification( "device", msg );
 
@@ -1545,13 +1545,13 @@ static void exitHook()
   if ( g_IsStarted && g_DoTrack )
   {
     log( "STOP on Exit Application" );
-    TrackBase::notification( "stop", "message=\"Stop on application exit\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+    TrackBase::notification( "stop", "message=\"Stop on application exit\" conf=%s  runMode=%sverbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
     g_Track.stop( playerTimeStamp() );
     g_IsStarted = false;
   }
 
   log( "RUN Exit Application" );
-  TrackBase::notification( "run", "message=\"Exit Application\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+  TrackBase::notification( "run", "message=\"Exit Application\" conf=%s  runMode=%sverbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
 
   g_Track.finishObserver();
 }
@@ -3344,7 +3344,7 @@ class lastErrors_resource : public http_resource {
 public:
     render_const std::shared_ptr<http_response> render(const http_request& req) {
 
-      //      printf( "lastErrors_resource\n" );
+      //      printf( "lastErrors_resource %s\n", g_ErrorLogFile.c_str() );
 
       std::string result;
 
@@ -3370,7 +3370,6 @@ public:
 	std::string timestamp2Start( timestamp2.c_str() );
 
 	LidarDeviceList devices( g_Devices.allDevices() );
-
 	for ( int i = 0; i < size; ++i )
         { 
 	  std::vector<std::string> pair( split(lines[lines.size()-1-i],']',2) );
@@ -3531,7 +3530,7 @@ public:
       
       if ( !g_IsStarted )
       { g_IsStarted = true;
-	TrackGlobal::notification( "start", "message=\"Start by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+	TrackGlobal::notification( "start", "message=\"Start by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
       }
       
       LidarDeviceList devices( g_Devices.allDevices() );
@@ -3602,7 +3601,7 @@ public:
       
       if ( g_IsStarted )
       { g_IsStarted = false;
-	TrackGlobal::notification( "stop", "message=\"Stop by API\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+	TrackGlobal::notification( "stop", "message=\"Stop by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
       }
       
       LidarDeviceList devices( g_Devices.allDevices() );
@@ -4404,7 +4403,7 @@ public:
 	    json += ",";
 	    
 	  json += "\"conf\": \"";
-	  json += g_Config;
+	  json += g_Conf;
 	  json += "\"";
 	}
 
@@ -7357,10 +7356,10 @@ int main( int argc, const char *argv[] )
     { device()->rplidar.scanMode = argv[++i];
     }
     else if ( strcmp(argv[i],"+env") == 0 )
-    { device()->envFileName = argv[++i];
+    { device()->envFileName = TrackGlobal::configFileName( argv[++i] );
     }
     else if ( strcmp(argv[i],"+mtx") == 0 )
-    { device()->matrixFileName = argv[++i];
+    { device()->matrixFileName = TrackGlobal::configFileName( argv[++i] );
     }
     else if ( strcmp(argv[i],"+webport") == 0 || strcmp(argv[i],"+wp") == 0 )
     {
@@ -7408,7 +7407,7 @@ int main( int argc, const char *argv[] )
     { 
       bool useSuffix = true;
       
-      std::string fileName( argv[++i] );
+      std::string fileName( TrackGlobal::configFileName( argv[++i] ) );
       if ( fileName == "month" || fileName == "monthly" )
 	fileName = "log/log_%monthly";
       else if ( fileName == "week" || fileName == "weekly" )
@@ -7446,7 +7445,6 @@ int main( int argc, const char *argv[] )
     {
       TrackGlobal::loadRegions();
 
-
       std::string mapType = (strcmp(argv[i],"+trackHeatMap") == 0 ? "heatmap" : "tracemap" );
 
       TrackableRegion *mapRect = TrackGlobal::regions.get( mapType.c_str() );
@@ -7459,7 +7457,7 @@ int main( int argc, const char *argv[] )
 
       bool useSuffix = true;
       
-      std::string fileName( argv[++i] );
+      std::string fileName( TrackGlobal::configFileName( argv[++i] ) );
       if ( fileName == "month" || fileName == "monthly" )
 	fileName = mapType+"/"+mapType + "_%monthly";
       else if ( fileName == "week" || fileName == "weekly" )
@@ -7639,15 +7637,15 @@ int main( int argc, const char *argv[] )
     }
     else if ( strcmp(argv[i],"+simulationEnvMap") == 0 )
     {
-      simulationEnvMapFileName = argv[++i];
+      simulationEnvMapFileName = TrackGlobal::configFileName( argv[++i] );
     }
     else if ( strcmp(argv[i],"+trackOcclusionMap") == 0 )
     {
-      trackOcclusionMapFileName = argv[++i];
+      trackOcclusionMapFileName = TrackGlobal::configFileName( argv[++i] );
     }
     else if ( strcmp(argv[i],"+obstacle") == 0 )
     {
-      obstacleFileName = argv[++i];
+      obstacleFileName = TrackGlobal::configFileName( argv[++i] );
       obstacleExtent   = argv[++i];
     }
     else if ( strcmp(argv[i],"+useBlueprints") == 0 )
@@ -7689,19 +7687,19 @@ int main( int argc, const char *argv[] )
     else if ( strcmp(argv[i],"+errorLogFile") == 0 )
     { 
       const char *fileName = argv[++i];
-      g_ErrorLogFile = fileName;
-      TrackGlobal::setErrorFileName( TrackGlobal::configFileName(fileName).c_str() );
+      g_ErrorLogFile = TrackGlobal::configFileName(fileName);
+      TrackGlobal::setErrorFileName( g_ErrorLogFile.c_str() );
     }
     else if ( strcmp(argv[i],"+logFile") == 0 )
     { 
       const char *fileName = argv[++i];
-      g_LogFile = fileName;
-      TrackGlobal::setLogFileName( TrackGlobal::configFileName(fileName).c_str() );
+      g_LogFile = TrackGlobal::configFileName(fileName);
+      TrackGlobal::setLogFileName( g_LogFile.c_str() );
     }
     else if ( strcmp(argv[i],"+notificationScript") == 0 )
     { 
       const char *notificationScript = argv[++i];
-      TrackGlobal::setNotificationScript( TrackGlobal::getConfigFileName(notificationScript).c_str() );
+      TrackGlobal::setNotificationScript( TrackGlobal::configFileName(notificationScript).c_str() );
     }
     else if ( g_Track.m_Stage->parseArg( i, (const char **) argv, argc ) )
     {
@@ -7808,7 +7806,7 @@ int main( int argc, const char *argv[] )
   setPlayerSyncTime();
 
   log( "RUN Run Application" );
-  TrackGlobal::notification( "run", "message=\"Run Application\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+  TrackGlobal::notification( "run", "message=\"Run Application\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
 
   if ( !g_SpinningReportScript.empty() )
   { resolveSensorIN();
@@ -7822,7 +7820,7 @@ int main( int argc, const char *argv[] )
   if ( TrackBase::packedPlayer() == NULL && g_OpenOnStart )
   { 
     log( withRunningMode("START on application start").c_str() );
-    TrackGlobal::notification( "start", "message=\"Start on application start\" runMode=%s verbose=%s", g_RunningMode.c_str(), g_Verbose?"true":"false" );
+    TrackGlobal::notification( "start", "message=\"Start on application start\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
 
     devices = g_Devices.activeDevices();
     for ( int d = 0; d < devices.size(); ++d )
