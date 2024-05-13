@@ -120,7 +120,7 @@ See [samples](lidarconfig/samples) for creating executable examples.
 
 # Talk
 
-Watch a talk about the applications @Belvedere Museum (20min):
+Watch a talk about the applications @Belvedere Museum (20min,german):
 
 [Lintermann, Schütze | Das Kunstmuseum im digitalen Zeitalter – 2024 - YouTube](https://www.youtube.com/watch?v=7_z_5SXYUWM)
 
