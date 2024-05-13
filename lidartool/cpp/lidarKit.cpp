@@ -2422,6 +2422,10 @@ LDLidarDriver *
 LidarDevice::openLDLidarDriver( const char *model )
 {
   LDLidarDriver *ldSerialDrv = new LDLidarDriver( usePWM, pwmChip, pwmChannel );
+  if ( isSimulationMode )
+  { ldSerialDrv->model = model;
+    setSpec( LDLIDAR, model );
+  }
 
   if ( !isSimulationMode && !ldSerialDrv->connect( deviceName.c_str(), model ) )
   { delete ldSerialDrv;
@@ -2432,7 +2436,7 @@ LidarDevice::openLDLidarDriver( const char *model )
   ScanData laserScan;
 
   bool success = isSimulationMode;
-  while ( !success && getmsec()-startMSec < 250 )
+  while ( !success && getmsec()-startMSec < 350 )
   { usleep( 10000 );
     success = ldSerialDrv->grabScanData( laserScan );
   }
@@ -2705,10 +2709,6 @@ LidarDevice::openDeviceMSLidar( bool tryOpen )
     return false;
   }
 
-
-  if ( g_Verbose > 0 )
-    Lidar::info( "LidarDevice(%s)::open(%s) succeeded", MSLidarTypeName, deviceName.c_str() );
-
   currentMotorSpeed = 7.0;
 
   if ( !isSimulationMode )
@@ -2745,6 +2745,9 @@ LidarDevice::openDeviceMSLidar( bool tryOpen )
     }
   }
   
+  if ( g_Verbose > 0 )
+    Lidar::info( "LidarDevice(%s)::open(%s) succeeded", MSLidarTypeName, deviceName.c_str() );
+
   info.detectedDeviceType = "ms200";
   setSpec( MSLIDAR, info.detectedDeviceType.c_str() );
   setDeviceType( info.detectedDeviceType.c_str() );

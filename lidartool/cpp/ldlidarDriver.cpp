@@ -45,6 +45,9 @@
 ****************************************************************************/
 
 static int g_Verbose = false;
+static const int minNoiseIntensity = 0;
+static const int minDistance       = 200;
+static const int maxNoiseDistance  = 1000;
 
 class Lidar
 {
@@ -341,11 +344,47 @@ LDLidarDriver::grabScanData( ScanData &data, int timeout )
   if ( status != ldlidar::LidarStatus::NORMAL )
     return false;
   
-  data.resize( laserScan.size() );
+      /* filter single samples / noise */
 
-  for ( int i = ((int)laserScan.size())-1; i >= 0; --i )
+  int size = laserScan.size();
+
+  ldlidar::Points2D   filteredScan;
+  filteredScan.resize( size );
+  
+
+  ldlidar::PointData *lastScanData = &laserScan[size-1];
+  ldlidar::PointData *scanData     = &laserScan[0];
+  ldlidar::PointData *nextScanData;
+
+  for ( int i = 0; i < size; ++i )
   {
-    ldlidar::PointData &scanData( laserScan[i] );
+    filteredScan[i] = *scanData;
+
+    nextScanData = &laserScan[(i+1)%size];
+
+    if ( scanData->intensity > minNoiseIntensity )
+    {
+      if ( scanData->distance < minDistance )
+	filteredScan[i].intensity = 0;
+      else if ( lastScanData->intensity <= minNoiseIntensity && nextScanData->intensity <= minNoiseIntensity )
+	filteredScan[i].intensity = 0;
+      else if ( (lastScanData->intensity > minNoiseIntensity && abs(lastScanData->distance-scanData->distance) < maxNoiseDistance) ||
+		(nextScanData->intensity > minNoiseIntensity && abs(nextScanData->distance-scanData->distance) < maxNoiseDistance) )
+	;
+      else
+	filteredScan[i].intensity = 0;
+    }
+    
+    lastScanData = scanData;
+    scanData     = nextScanData;
+  }
+
+  data.resize( size );
+
+  for ( int i = size-1; i >= 0; --i )
+  {
+//    ldlidar::PointData &scanData( laserScan[i] );
+    ldlidar::PointData &scanData( filteredScan[i] );
     ScanPoint &sample   ( data[i] );
    
     sample.distance = scanData.distance / 1000.0;
