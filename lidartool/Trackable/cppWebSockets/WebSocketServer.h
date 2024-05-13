@@ -37,6 +37,7 @@ public:
     // Represents a client connection
     struct Connection
     {
+        std::vector<uint8_t>       readBuffer; 
         list<std::vector<uint8_t>> buffer;     // Ordered list of pending messages to flush out when socket is writable
         map<string,string> keyValueMap;
         time_t             createTime;

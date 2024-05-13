@@ -91,8 +91,26 @@ static int callback_main(   struct lws *wsi,
         case LWS_CALLBACK_RECEIVE:
         {
 	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
-            self->onMessage( lws_get_socket_fd( wsi ), string( (const char *)in, len ) );
-            break;
+	    int fd = lws_get_socket_fd( wsi );
+	    
+	    bool isFinal = lws_is_final_fragment(wsi);
+	    std::vector<uint8_t> &readBuffer( self->connections[fd]->readBuffer );
+	    
+	    if ( isFinal && readBuffer.empty() )
+	      self->onMessage( fd, std::string( (const char *)in, len ) );
+	    else
+            { int size = readBuffer.size();
+	      readBuffer.resize( size + len );
+	      memcpy( &readBuffer[size], static_cast<const uint8_t *>(in), len );
+
+	      if ( isFinal )
+   	      { len = readBuffer.size();
+		self->onMessage( fd, std::string( (const char *)&readBuffer[0], len) );
+		readBuffer.resize( 0 );
+	      }
+	    }
+
+           break;
 	}
         case LWS_CALLBACK_CLOSED:
         {
