@@ -121,7 +121,8 @@ See [samples](lidarconfig/samples) for creating executable examples.
 # Talk
 
 Watch a talk about the applications @Belvedere Museum (20min):
-  [Lintermann, Schütze | Das Kunstmuseum im digitalen Zeitalter – 2024 - YouTube](https://www.youtube.com/watch?v=7_z_5SXYUWM)
+
+[Lintermann, Schütze | Das Kunstmuseum im digitalen Zeitalter – 2024 - YouTube](https://www.youtube.com/watch?v=7_z_5SXYUWM)
 
 # The Intelligent Museum
 
