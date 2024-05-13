@@ -1477,8 +1477,9 @@ public:
   {
     if ( fromFile )
     { 
+      scheme = configFileName( scheme.c_str() );
       if ( !fileExists( scheme.c_str() ) )
-      { error( "TrackableObserver::setScheme() ERROR: file %s doen not exist", scheme.c_str() );
+      { error( "TrackableObserver::setScheme() ERROR: file %s does not exist", scheme.c_str() );
 	return false;
       }
 
