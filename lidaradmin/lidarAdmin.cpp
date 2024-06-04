@@ -1708,9 +1708,9 @@ static nodes_resource         	nodes_r;
 static void
 runWebServer()
 {
-  const int max_threads = 16;
+  const int max_threads = 32;
 
-  webserv = new webserver(create_webserver(admin_port).max_threads(max_threads).max_connections(max_threads));
+  webserv = new webserver(create_webserver(admin_port).max_threads(max_threads));
 
   webserv->register_resource("get", &get_r);
   webserv->register_resource("set", &set_r);
