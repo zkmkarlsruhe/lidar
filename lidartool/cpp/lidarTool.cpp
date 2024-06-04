@@ -4004,12 +4004,40 @@ getDeviceHealth()
   return Back;
 }
 
+class GetLogger 
+{
+public:
+  uint64_t t;
+  std::string tp;
+  bool isFinished;
+
+  GetLogger( const char *type )
+    : t( getmsec() ),
+      tp( type ),
+      isFinished( false )
+  {
+    TrackGlobal::info( "GET LOGGER %s", tp.c_str() );
+  }
+
+  ~GetLogger()
+  {
+    if ( !isFinished )
+      finish();
+  }
+
+  void finish()
+  { TrackGlobal::info( "GET LOGGER %s: %ld msec", tp.c_str(), getmsec()-t );
+    isFinished = true;
+  }
+};
 
 class status_resource : public http_resource {
 public:
     render_const std::shared_ptr<http_response> render_GET(const http_request& req) {
 
-      //  printf( "status_resource\n" );
+#if DEBUG_STATUS
+      GetLogger logger( "status_resource" );  //// DEBUG
+#endif
 
       std::string started( "started" );
       std::string stopped( "stopped" );
@@ -4054,6 +4082,10 @@ public:
 
       webMutex.unlock();
            
+#if DEBUG_STATUS
+      logger.finish();  //// DEBUG
+#endif
+
       return jsonResponse( json );
     }
 };
@@ -4063,6 +4095,12 @@ public:
     render_const std::shared_ptr<http_response> render(const http_request& req) {
 
 //  printf( "get_resource\n" );
+
+      std::string path("." );  //// DEBUG
+      path += req.get_querystring();  //// DEBUG
+#if DEBUG_STATUS
+      GetLogger logger(( std::string("get_resource ")+path).c_str() );  //// DEBUG
+#endif
 
       std::string region, group;
       
@@ -5623,6 +5661,10 @@ public:
       path += req.get_path();
 
 //     printf( "Path: %s\n", path.c_str() );
+      
+#if DEBUG_STATUS
+      GetLogger logger(( std::string("html_resource ")+path).c_str() );  //// DEBUG
+#endif
 
       if ( endsWithCaseInsensitive( path, "/title.html" ) )
       {
@@ -5854,12 +5896,20 @@ public:
       }
       else if ( path == "./" || path == "./index.html" )
       {
+	uint64_t t = getmsec(); //// DEBUG
+#if DEBUG_STATUS
+	GetLogger logger( "index.html" );  //// DEBUG
+#endif
+
 	std::shared_ptr<http_response> response( fileResponse( "index.html", "text/html" ) );
 
 	std::string lidartool( "lidartool" );
 	std::string cookie( std::to_string(getmsec()&0xffffffff) );
 	response->with_cookie( lidartool, cookie );
 	
+#if DEBUG_STATUS
+	logger.finish(); //// DEBUG
+#endif
 	return response;
       }
       else if ( path == "./settings" )
@@ -5929,7 +5979,7 @@ runWebServer()
 {
   webId = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   
-  const int max_threads = 20;
+  const int max_threads = 32;
   webserv = new webserver(create_webserver(webserver_port).max_threads(max_threads));
 
   webserv->register_resource("/start", &start_r);
