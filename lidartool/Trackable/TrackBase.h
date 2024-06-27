@@ -250,6 +250,8 @@ public:
     static void setLogFileName       ( const char *fileName );
     static void setNotificationScript( const char *scriptFileName );
     
+    static void printConfig	     ();
+
     static void setReadCheckPoint    ( const char *checkPoint );
     static std::string  getConfigFileName( const char *fileName, const char *suffix=NULL, const char *path=NULL, CheckPointMode checkPointMode=NoCheckPoint, uint64_t timestamp=0 );
     static void catchSigPipe();

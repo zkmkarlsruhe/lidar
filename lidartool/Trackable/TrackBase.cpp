@@ -251,7 +251,7 @@ printInfo( const char *format, ...  )
   va_start( args, format );
 
   mutex.lock();
-  print( stdout, ": [INFO] ", format, args );
+  print( stdout, ": [Info] ", format, args );
   mutex.unlock();
   
   va_end(args);
@@ -294,7 +294,7 @@ notification( const char *tags, const char *format, ...  )
     mutex.lock();
     const int maxLen = 2000;
     char buffer[maxLen+1];
-    snprintf( buffer, maxLen, ": [INFO] notification(): type=%s ", tags );
+    snprintf( buffer, maxLen, ": [Info] notification(): type=%s ", tags );
     print( stdout, buffer, format, args );
     mutex.unlock();
   
@@ -338,6 +338,36 @@ TrackGlobal::setNotificationScript( const char *scriptFileName )
 
   if ( g_NotificationScript[0] != '.' && g_NotificationScript[0] != '/' )
     g_NotificationScript = std::string("./") + g_NotificationScript;
+}
+
+void
+TrackGlobal::printConfig()
+{
+  info( "routing Info to stdout" );
+
+  std::string warning( "stderr" );
+  if ( !g_ErrorFileName.empty() )
+    warning = g_ErrorFileName;
+  
+  info( "routing Warning to \"%s\"", warning.c_str() );
+
+  std::string error( "stderr" );
+  if ( !g_ErrorFileName.empty() )
+    error = g_ErrorFileName;
+  
+  info( "routing Error to \"%s\"", error.c_str() );
+
+  std::string log( "stdout" );
+  if ( !g_LogFileName.empty() )
+    log = g_LogFileName;
+  
+  info( "routing Log to \"%s\"", log.c_str() );
+  
+  std::string notification( "stdout" );
+  if ( !g_NotificationScript.empty() )
+    notification = g_NotificationScript;
+
+  info( "routing Notifications to \"%s\"", notification.c_str() );
 }
 
 /***************************************************************************

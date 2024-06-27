@@ -7771,6 +7771,20 @@ int main( int argc, const char *argv[] )
     }
   }
 
+  if ( TrackGlobal::verbose() )
+  {
+    TrackGlobal::printConfig(); 
+    if ( !g_FailureReportScript.empty() )
+      TrackGlobal::info( "using failure report script \"%s\"", g_FailureReportScript.c_str() );
+    else
+      TrackGlobal::info( "failure report script not defined" );
+
+    if ( !g_SpinningReportScript.empty() )
+      TrackGlobal::info( "using spinning report script \"%s\"", g_SpinningReportScript.c_str() );
+    else
+      TrackGlobal::info( "spinning report script not defined" );
+  }
+  
   if ( g_Devices.isSimulationMode() )
   {
     if ( !simulationEnvMapFileName.empty() )
