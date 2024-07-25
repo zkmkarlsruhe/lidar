@@ -364,7 +364,7 @@ registerSensors() {
 
       if [ "$group" != "" ] ; then
 	  mac=$(echo $entry | awk '{print $6}' | tr "[:upper:]" "[:lower:]")
-	  if [ "$mac" != "" ] && "$(macExists $mac $nodeDB)" == "0" ] ; then
+	  if [ "$mac" != "" ] && [ "$(macExists $mac $nodeDB)" == "0" ] ; then
 	      new_entry="$mac $noIP 000 unknown unknown _ pwUndef"
 
 	      echo "$new_entry" >> $nodeDB
