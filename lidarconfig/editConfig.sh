@@ -457,6 +457,7 @@ promptParam dataDir "directory where to store data. will be checked for full dis
 promptParam recordPackedDir "directory where to record packed data. leave empty for no recording"
 
 promptParam blueprintExtent "Extent of blueprint in Pixel=Meter"
+updateBlueprintFiles
 
 # blueprint image file name
 paramValue blueprintImageFile
@@ -516,7 +517,7 @@ if [ "$(export | grep -i mate)" != "" ] ; then
 	promptParam desktopColor "desktop color"
 
 	source $config
-	convert -size 1920x1080 -background "#$desktopColor" -fill white -gravity center -pointsize 112 -font Helvetica label:"$desktopLabel\\nServer" $confDir/desktopBackground.jpg
+	convert -size 1920x1080 -background "#$desktopColor" -fill white -gravity center -pointsize 112 -font Ubuntu label:"$desktopLabel\\nServer" $confDir/desktopBackground.jpg
 
 	dconf write "/org/mate/desktop/background/picture-filename" "'$confDir/desktopBackground.jpg'"
     fi
