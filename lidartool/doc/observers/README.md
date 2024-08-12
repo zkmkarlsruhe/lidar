@@ -467,12 +467,14 @@ These filter definitions will have exactly the same result:
 | position           | the object position aggregated                                                                   |
 | x,y,z              | the object position as separate parameters                                                       |
 | size               | the object size                                                                                  |
+| action             | report start/stop                                           |
 | type               | report the event type, can be *enter*, *leave*, *move*                                           |
 | enter, leave, move | report if the the event matches                                                                  |
 | lifespan           | report lifespan when object leaves                                                               |
 | count              | number of objects detected                                                                       |
 | switch             | 0 if no object detected, 1 otherwise                                                             |
 | switchduration     | duration in milliseconds switch is set to 1                                                      |
+| statistics         | report statistics when stopping                                                                  |
 | region             | report the region in which objects are detected                                                  |
 | regions            | indicates that regions should aggregated/grouped                                                 |
 | alive              | emits 1 every `aliveTimeout` sec                                                                 |

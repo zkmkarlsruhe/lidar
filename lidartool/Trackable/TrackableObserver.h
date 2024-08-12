@@ -92,7 +92,8 @@ namespace Filter
     OBSV_REGIONY      = (1ULL<<37),
     OBSV_REGIONWIDTH  = (1ULL<<38),
     OBSV_REGIONHEIGHT = (1ULL<<39),
-    OBSV_RUNMODE      = (1ULL<<40)
+    OBSV_RUNMODE      = (1ULL<<40),
+    OBSV_STATISTICS   = (1ULL<<41)
 };
 
 static inline const char *ObsvFrame       = Frame;
@@ -135,6 +136,7 @@ static const char *ObsvRegionY      = "region_y";
 static const char *ObsvRegionWidth  = "region_width";
 static const char *ObsvRegionHeight = "region_height";
 static const char *ObsvRunMode      = "runmode";
+static const char *ObsvStatistics   = "statistics";
 
 class ObsvFilter : public Filter
 {
@@ -183,8 +185,9 @@ public:
     addFilter( OBSV_REGIONX,      ObsvRegionX );
     addFilter( OBSV_REGIONY,      ObsvRegionY );
     addFilter( OBSV_REGIONWIDTH,  ObsvRegionWidth );
-    addFilter( OBSV_REGIONHEIGHT, ObsvRunMode );
-    addFilter( OBSV_RUNMODE,      ObsvUUID );
+    addFilter( OBSV_REGIONHEIGHT, ObsvRegionHeight );
+    addFilter( OBSV_RUNMODE,      ObsvRunMode );
+    addFilter( OBSV_STATISTICS,   ObsvStatistics );
     addFilter( OBSV_UUID,    	  ObsvUUID );
 
     initialized = false;
@@ -481,6 +484,7 @@ public:
   int		gateCount,   lastGateCount;
   int		lastAvgLifespan, avgLifespan, lifespanCount;
   uint64_t 	lifespanSum;
+  uint64_t 	switchDurationSum;
   float         centerX, centerY, centerZ;
   float		operational;
   int		alive;
@@ -492,27 +496,28 @@ public:
   std::string   region;
   
   ObsvObjects()
-  : timestamp       (  0 ),
-    alive_timestamp (  0 ),
-    switch_timestamp(  0 ),
-    lastCount       ( -1 ),
-    enterCount      (  0 ),
-    leaveCount      (  0 ),
-    gateCount       (  0 ),
-    lastEnterCount  ( -1 ),
-    lastLeaveCount  ( -1 ),
-    lastGateCount   ( -1 ),
-    lastAvgLifespan ( -1 ),
-    avgLifespan     (  0 ),
-    lifespanSum     (  0 ),
-    lifespanCount   (  0 ),
-    centerX         (  0 ),
-    centerY         (  0 ),
-    centerZ         (  0 ),
-    operational	    (  1 ),
-    alive	    (  1 ),
-    custom          (  NULL ),
-    userData        (  NULL )
+  : timestamp        (  0 ),
+    alive_timestamp  (  0 ),
+    switch_timestamp (  0 ),
+    lastCount        ( -1 ),
+    enterCount       (  0 ),
+    leaveCount       (  0 ),
+    gateCount        (  0 ),
+    lastEnterCount   ( -1 ),
+    lastLeaveCount   ( -1 ),
+    lastGateCount    ( -1 ),
+    lastAvgLifespan  ( -1 ),
+    avgLifespan      (  0 ),
+    lifespanSum      (  0 ),
+    lifespanCount    (  0 ),
+    switchDurationSum(  0 ),
+    centerX          (  0 ),
+    centerY          (  0 ),
+    centerZ          (  0 ),
+    operational	     (  1 ),
+    alive	     (  1 ),
+    custom           (  NULL ),
+    userData         (  NULL )
     {}
   
   ~ObsvObjects()
@@ -792,17 +797,18 @@ public:
     {
       ObsvObjects &objects( rect(i).objects );
       objects.clear();
-      objects.lastCount        = -1;
-      objects.enterCount       =  0;
-      objects.lastEnterCount   = -1;
-      objects.leaveCount       =  0;
-      objects.lastLeaveCount   = -1;
-      objects.gateCount        =  0;
-      objects.lastGateCount    = -1;
-      objects.lastAvgLifespan  = -1;
-      objects.lifespanSum      =  0;
-      objects.lifespanCount    =  0;
-      objects.switch_timestamp =  0;
+      objects.lastCount         = -1;
+      objects.enterCount        =  0;
+      objects.lastEnterCount    = -1;
+      objects.leaveCount        =  0;
+      objects.lastLeaveCount    = -1;
+      objects.gateCount         =  0;
+      objects.lastGateCount     = -1;
+      objects.lastAvgLifespan   = -1;
+      objects.lifespanSum       =  0;
+      objects.lifespanCount     =  0;
+      objects.switch_timestamp  =  0;
+      objects.switchDurationSum =  0;
     }
   }
   
@@ -811,17 +817,18 @@ public:
     for ( int i = numRects()-1; i >= 0; --i )
     {
       ObsvObjects &objects( rect(i).objects );
-      objects.lastCount        = -1;
-      objects.enterCount       =  0;
-      objects.lastEnterCount   = -1;
-      objects.leaveCount       =  0;
-      objects.lastLeaveCount   = -1;
-      objects.gateCount        =  0;
-      objects.lastGateCount    = -1;
-      objects.lastAvgLifespan  = -1;
-      objects.lifespanSum      =  0;
-      objects.lifespanCount    =  0;
-      objects.switch_timestamp =  0;
+      objects.lastCount         = -1;
+      objects.enterCount        =  0;
+      objects.lastEnterCount    = -1;
+      objects.leaveCount        =  0;
+      objects.lastLeaveCount    = -1;
+      objects.gateCount         =  0;
+      objects.lastGateCount     = -1;
+      objects.lastAvgLifespan   = -1;
+      objects.lifespanSum       =  0;
+      objects.lifespanCount     =  0;
+      objects.switch_timestamp  =  0;
+      objects.switchDurationSum =  0;
     }
   }
   
@@ -1313,6 +1320,7 @@ public:
 
   std::vector<std::string>                       operationalDevices;
 
+  uint64_t				         start_timestamp;
   uint64_t				         stalled_timestamp;
   uint64_t					 timestamp;
   uint64_t 					 frame_id;
@@ -1771,6 +1779,8 @@ public:
 
       if ( objects.validCount > 0 && objects.lastCount <= 0 )
 	objects.switch_timestamp = objects.timestamp;
+      else if ( objects.validCount == 0 && objects.lastCount > 0 && objects.switch_timestamp > 0 )
+	objects.switchDurationSum += objects.timestamp - objects.switch_timestamp;
     }
 
     if ( reporting )
@@ -2044,9 +2054,51 @@ public:
     { setJsonString( msg, obsvFilter.kmc(Filter::ObsvAction), obsvFilter.kmc(Filter::ObsvStop) );
       if ( obsvFilter.filterEnabled( Filter::OBSV_RUNMODE ) )
 	setJsonString( msg, obsvFilter.kmc(Filter::ObsvRunMode), runMode );
+
+      if ( obsvFilter.filterEnabled( Filter::OBSV_STATISTICS ) )
+      {
+	bool reportRegions = (rects.numRects() > 1);
+	msg += ",";
+      
+	if ( reportRegions )
+        { msg += obsvFilter.kmc(Filter::ObsvRegions);
+	  msg += ":[";
+	}
+	for ( int i = 0; i < rects.numRects(); ++i )
+        {
+	  ObsvObjects &objects( rects.rect(i).objects );
+	  std::string m;
+
+	  if ( reportRegions )
+	  { 
+	    if ( i > 0 )
+	      msg += ",";
+	      
+	    msg += "{";
+	    setJsonString( m, obsvFilter.kmc(Filter::ObsvRegion), objects.region );
+	  }
+
+	  reportJsonStatistics( objects, m );
+	  msg += m;
+	  if ( reportRegions )
+	    msg += "}";
+	}
+	if ( reportRegions )
+	  msg += "]";
+      }
     }
 
     return msg;
+  }
+
+  virtual void reportJsonStatistics( ObsvObjects &objects, std::string &msg )
+  {
+    uint64_t duration = objects.timestamp - start_timestamp;
+    setJsonInt  ( msg, "duration",    (int)duration );
+    setJsonInt  ( msg, "countSum",    (int)objects.lifespanCount );
+    setJsonInt  ( msg, "avgLifespan", (int)objects.avgLifespan );
+    setJsonInt  ( msg, "switchDurationSum", (int)objects.switchDurationSum );
+    setJsonFloat( msg, "switchFraction", objects.switchDurationSum / (double)duration );
   }
 
   virtual bool hasMovedObject( ObsvObjects &objects )
@@ -2335,6 +2387,7 @@ public:
     if ( timestamp == 0 )
       timestamp = getmsec();
     this->timestamp = timestamp;
+    start_timestamp = timestamp;
 
     if ( hasScheme )
     {
