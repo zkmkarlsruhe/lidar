@@ -394,6 +394,13 @@ public:
         { if ( continuous || ((bool)objects.lastCount) != (bool)objects.validCount )
 	    add( msg, obsvFilter.kmc(Filter::ObsvSwitch), (int)(bool)objects.validCount );
 	}
+	if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH_DURATION ) )
+        {
+	  if ( objects.lastCount > 0 && objects.switch_timestamp != 0 && (objects.validCount == 0 || continuous) )
+	    add( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)(objects.timestamp-objects.switch_timestamp) );
+	  else if ( continuous )
+	    add( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)0 );
+	}
 	if ( obsvFilter.filterEnabled( Filter::OBSV_ALIVE ) )
         { if ( objects.alive )
 	    add( msg, obsvFilter.kmc(Filter::ObsvAlive), objects.alive );
@@ -440,6 +447,13 @@ public:
 	if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH ) )
         { if ( continuous || ((bool)objects.lastCount) != (bool)objects.size() )
 	    add( msg, obsvFilter.kmc(Filter::ObsvSwitch), (int)(bool)objects.size() );
+	}
+	if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH_DURATION ) )
+        {
+	  if ( objects.lastCount > 0 && objects.switch_timestamp != 0 && (objects.validCount == 0 || continuous) )
+	    add( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)(objects.timestamp-objects.switch_timestamp) );
+	  else if ( continuous )
+	    add( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)0 );
 	}
 
 	if ( !msgEmpty && obsvFilter.filterEnabled( Filter::OBSV_REGION ) && !objects.region.empty() )

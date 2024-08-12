@@ -81,17 +81,18 @@ namespace Filter
     OBSV_ACTION       = (1ULL<<26),
     OBSV_COUNT        = (1ULL<<27),
     OBSV_SWITCH	      = (1ULL<<28),
-    OBSV_ALIVE        = (1ULL<<29),
-    OBSV_OPERATIONAL  = (1ULL<<30),
-    OBSV_RESET        = (1ULL<<31),
-    OBSV_REGIONS      = (1ULL<<32),
-    OBSV_REGION       = (1ULL<<33),
-    OBSV_UUID         = (1ULL<<34),
-    OBSV_REGIONX      = (1ULL<<35),
-    OBSV_REGIONY      = (1ULL<<36),
-    OBSV_REGIONWIDTH  = (1ULL<<37),
-    OBSV_REGIONHEIGHT = (1ULL<<38),
-    OBSV_RUNMODE      = (1ULL<<39)
+    OBSV_SWITCH_DURATION  = (1ULL<<29),
+    OBSV_ALIVE        = (1ULL<<30),
+    OBSV_OPERATIONAL  = (1ULL<<31),
+    OBSV_RESET        = (1ULL<<32),
+    OBSV_REGIONS      = (1ULL<<33),
+    OBSV_REGION       = (1ULL<<34),
+    OBSV_UUID         = (1ULL<<35),
+    OBSV_REGIONX      = (1ULL<<36),
+    OBSV_REGIONY      = (1ULL<<37),
+    OBSV_REGIONWIDTH  = (1ULL<<38),
+    OBSV_REGIONHEIGHT = (1ULL<<39),
+    OBSV_RUNMODE      = (1ULL<<40)
 };
 
 static inline const char *ObsvFrame       = Frame;
@@ -122,6 +123,7 @@ static const char *ObsvStop	    = "stop";
 static const char *ObsvAction	    = "action";
 static const char *ObsvCount	    = "count";
 static const char *ObsvSwitch	    = "switch";
+static const char *ObsvSwitchDuration   = "switchduration";
 static const char *ObsvAlive	    = "alive";
 static const char *ObsvOperational  = "operational";
 static const char *ObsvReset        = "reset";
@@ -171,6 +173,7 @@ public:
     addFilter( OBSV_ACTION,    	  ObsvAction );
     addFilter( OBSV_COUNT,    	  ObsvCount );
     addFilter( OBSV_SWITCH,    	  ObsvSwitch );
+    addFilter( OBSV_SWITCH_DURATION,  ObsvSwitchDuration );
     addFilter( OBSV_ALIVE,    	  ObsvAlive );
     addFilter( OBSV_OPERATIONAL,  ObsvOperational );
     addFilter( OBSV_RESET,    	  ObsvReset );
@@ -470,6 +473,7 @@ class ObsvObjects : public std::map<int,ObsvObject>
 public:
   uint64_t 	timestamp;
   uint64_t 	alive_timestamp;
+  uint64_t 	switch_timestamp;
   uint64_t 	frame_id;
   int		lastCount,   validCount;
   int		enterCount,  lastEnterCount;
@@ -488,26 +492,27 @@ public:
   std::string   region;
   
   ObsvObjects()
-  : timestamp      (  0 ),
-    alive_timestamp(  0 ),
-    lastCount      ( -1 ),
-    enterCount     (  0 ),
-    leaveCount     (  0 ),
-    gateCount      (  0 ),
-    lastEnterCount ( -1 ),
-    lastLeaveCount ( -1 ),
-    lastGateCount  ( -1 ),
-    lastAvgLifespan( -1 ),
-    avgLifespan    (  0 ),
-    lifespanSum    (  0 ),
-    lifespanCount  (  0 ),
-    centerX        (  0 ),
-    centerY        (  0 ),
-    centerZ        (  0 ),
-    operational	   (  1 ),
-    alive	   (  1 ),
-    custom         (  NULL ),
-    userData       (  NULL )
+  : timestamp       (  0 ),
+    alive_timestamp (  0 ),
+    switch_timestamp(  0 ),
+    lastCount       ( -1 ),
+    enterCount      (  0 ),
+    leaveCount      (  0 ),
+    gateCount       (  0 ),
+    lastEnterCount  ( -1 ),
+    lastLeaveCount  ( -1 ),
+    lastGateCount   ( -1 ),
+    lastAvgLifespan ( -1 ),
+    avgLifespan     (  0 ),
+    lifespanSum     (  0 ),
+    lifespanCount   (  0 ),
+    centerX         (  0 ),
+    centerY         (  0 ),
+    centerZ         (  0 ),
+    operational	    (  1 ),
+    alive	    (  1 ),
+    custom          (  NULL ),
+    userData        (  NULL )
     {}
   
   ~ObsvObjects()
@@ -538,7 +543,7 @@ public:
   }
 
   void clear()
-  { validCount = 0;
+  { validCount       = 0;
     std::map<int,ObsvObject>::clear();
   }
   
@@ -787,16 +792,17 @@ public:
     {
       ObsvObjects &objects( rect(i).objects );
       objects.clear();
-      objects.lastCount       = -1;
-      objects.enterCount      =  0;
-      objects.lastEnterCount  = -1;
-      objects.leaveCount      =  0;
-      objects.lastLeaveCount  = -1;
-      objects.gateCount       =  0;
-      objects.lastGateCount   = -1;
-      objects.lastAvgLifespan = -1;
-      objects.lifespanSum     =  0;
-      objects.lifespanCount   =  0;
+      objects.lastCount        = -1;
+      objects.enterCount       =  0;
+      objects.lastEnterCount   = -1;
+      objects.leaveCount       =  0;
+      objects.lastLeaveCount   = -1;
+      objects.gateCount        =  0;
+      objects.lastGateCount    = -1;
+      objects.lastAvgLifespan  = -1;
+      objects.lifespanSum      =  0;
+      objects.lifespanCount    =  0;
+      objects.switch_timestamp =  0;
     }
   }
   
@@ -805,16 +811,17 @@ public:
     for ( int i = numRects()-1; i >= 0; --i )
     {
       ObsvObjects &objects( rect(i).objects );
-      objects.lastCount       = -1;
-      objects.enterCount      =  0;
-      objects.lastEnterCount  = -1;
-      objects.leaveCount      =  0;
-      objects.lastLeaveCount  = -1;
-      objects.gateCount       =  0;
-      objects.lastGateCount   = -1;
-      objects.lastAvgLifespan = -1;
-      objects.lifespanSum     =  0;
-      objects.lifespanCount   =  0;
+      objects.lastCount        = -1;
+      objects.enterCount       =  0;
+      objects.lastEnterCount   = -1;
+      objects.leaveCount       =  0;
+      objects.lastLeaveCount   = -1;
+      objects.gateCount        =  0;
+      objects.lastGateCount    = -1;
+      objects.lastAvgLifespan  = -1;
+      objects.lifespanSum      =  0;
+      objects.lifespanCount    =  0;
+      objects.switch_timestamp =  0;
     }
   }
   
@@ -1070,6 +1077,15 @@ public:
       hasUpdate |= ( continuous || ((bool)objects->lastCount) != (bool)objects->validCount );
       hasDynamic = true;
       return ObsvValue( (int32_t)(bool)objects->validCount );
+    } );
+
+    addObsvValueGet( Filter::ObsvSwitchDuration, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
+    { 
+      hasUpdate |= ( continuous || (objects->lastCount > 0 && objects->validCount == 0 && objects->switch_timestamp != 0) );
+      hasDynamic = true;
+      if ( objects->switch_timestamp == 0 )
+	return ObsvValue( (int64_t)0 );
+      return ObsvValue( (int64_t)(timestamp-objects->switch_timestamp) );
     } );
 
     addObsvValueGet( Filter::ObsvCount, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
@@ -1672,7 +1688,10 @@ public:
       objects.lastLeaveCount  = objects.leaveCount;
       objects.lastGateCount   = objects.gateCount;
       objects.lastAvgLifespan = objects.avgLifespan;
-      
+
+      if ( objects.validCount == 0 )
+	objects.switch_timestamp = 0;
+
       if ( objects.alive )
 	objects.alive_timestamp = objects.timestamp;
 
@@ -1749,6 +1768,9 @@ public:
 	}
 
       objects.validCount = objects.size() - invalidCount;
+
+      if ( objects.validCount > 0 && objects.lastCount <= 0 )
+	objects.switch_timestamp = objects.timestamp;
     }
 
     if ( reporting )
@@ -1965,6 +1987,13 @@ public:
     if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH ) )
     { if ( continuous || ((bool)objects.lastCount) != (bool)objects.validCount )
 	setJsonInt( msg, obsvFilter.kmc(Filter::ObsvSwitch), (int)(bool)objects.validCount );
+    }
+    if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH_DURATION ) )
+    {
+      if ( objects.lastCount > 0 && objects.switch_timestamp != 0 && (objects.validCount == 0 || continuous) )
+	setJsonInt( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)(objects.timestamp-objects.switch_timestamp) );
+      else if ( continuous )
+	setJsonInt( msg, obsvFilter.kmc(Filter::ObsvSwitchDuration), (int)0 );
     }
     if ( obsvFilter.filterEnabled( Filter::OBSV_ALIVE ) )
     { if ( objects.alive )
@@ -2583,6 +2612,12 @@ public:
 	  else
 	  { param = "type=switch switch=";
 	    param += (count ? "true" : "false");
+
+	    if ( obsvFilter.filterEnabled( Filter::OBSV_SWITCH_DURATION ) )
+            {
+	      param += " switchduration=";
+	      param += std::to_string( (int)(objects.timestamp-objects.switch_timestamp) );
+	    }
 	  }
 	  
 	  param += " ";

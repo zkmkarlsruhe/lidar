@@ -378,6 +378,33 @@ ObsvObjects_size( lua_State *lua )
 }
 
 int
+ObsvObjects_count( lua_State *lua )
+{
+  getInstance( objects, lua, ObsvObjects );
+
+  bool includePrivate = true;
+  int valueType = lua_type( lua, 2 );
+  if ( valueType == LUA_TBOOLEAN )
+    includePrivate = lua_toboolean( lua, 2 );
+
+  if ( includePrivate )
+    lua_pushinteger( lua, objects->validCount );
+  else
+  {
+    int validCount = 0;
+ 
+    for ( auto &iter: *objects )
+      if ( iter.second.status == ObsvObject::Move )
+	if ( !iter.second.isPrivate() )
+	  validCount += 1;
+    
+    lua_pushinteger( lua, objects->validCount );
+  }
+  
+  return 1;
+}
+
+int
 ObsvObjects_switch( lua_State *lua )
 {
   getInstance( objects, lua, ObsvObjects );
@@ -404,29 +431,15 @@ ObsvObjects_switch( lua_State *lua )
 }
 
 int
-ObsvObjects_count( lua_State *lua )
+ObsvObjects_switchduration( lua_State *lua )
 {
   getInstance( objects, lua, ObsvObjects );
 
-  bool includePrivate = true;
-  int valueType = lua_type( lua, 2 );
-  if ( valueType == LUA_TBOOLEAN )
-    includePrivate = lua_toboolean( lua, 2 );
-
-  if ( includePrivate )
-    lua_pushinteger( lua, objects->validCount );
+  if ( objects->switch_timestamp == 0 )
+    lua_pushinteger( lua, objects->switch_timestamp );
   else
-  {
-    int validCount = 0;
- 
-    for ( auto &iter: *objects )
-      if ( iter.second.status == ObsvObject::Move )
-	if ( !iter.second.isPrivate() )
-	  validCount += 1;
+    lua_pushinteger( lua, objects->timestamp-objects->switch_timestamp );
     
-    lua_pushinteger( lua, objects->validCount );
-  }
-  
   return 1;
 }
 
@@ -505,8 +518,9 @@ LuaFunc_Reg ObsvObjectsFunctions[] =
   { "centerX", (Lua_CFunction)ObsvObjects_centerX },
   { "centerY", (Lua_CFunction)ObsvObjects_centerY },
   { "centerZ", (Lua_CFunction)ObsvObjects_centerZ },
-  { "switch", (Lua_CFunction)ObsvObjects_switch },
   { "count", (Lua_CFunction)ObsvObjects_count },
+  { "switch", (Lua_CFunction)ObsvObjects_switch },
+  { "switchduration", (Lua_CFunction)ObsvObjects_switchduration },
   { "regionName", (Lua_CFunction)ObsvObjects_regionName },
   { "regionX", (Lua_CFunction)ObsvObjects_regionX },
   { "regionY", (Lua_CFunction)ObsvObjects_regionY },
