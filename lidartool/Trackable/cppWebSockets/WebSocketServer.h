@@ -23,6 +23,7 @@
 #include <sys/time.h>
 #include <iostream>
 #include <sstream>
+#include <mutex>
 #include "libwebsockets.h"
 
 using namespace std;
@@ -49,6 +50,7 @@ public:
     set<int>             connectionsToRemove;
 
     bool		 _binary;
+    std::mutex 	 	  mutex;
     
 
     // Constructor / Destructor

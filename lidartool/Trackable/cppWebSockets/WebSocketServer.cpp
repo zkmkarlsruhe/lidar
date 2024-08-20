@@ -42,15 +42,19 @@ static int callback_main(   struct lws *wsi,
         {
 	  char name[200], rip[200];
 	  WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+	  self->mutex.lock();
 	  fd = lws_get_socket_fd( wsi );
 	  lws_get_peer_addresses( wsi, fd, name, 200, rip, 200 );
 	  self->onConnectWrapper( fd, rip );
+	  self->mutex.unlock();
 	  lws_callback_on_writable( wsi );
 	  break;
 	}
         case LWS_CALLBACK_SERVER_WRITEABLE:
         {
 	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+	    self->mutex.lock();
+	    self->mutex.unlock();
 	  
 	    fd = lws_get_socket_fd( wsi );
     	    
@@ -91,6 +95,8 @@ static int callback_main(   struct lws *wsi,
         case LWS_CALLBACK_RECEIVE:
         {
 	    WebSocketServer *self = static_cast<WebSocketServer*>(lws_context_user(lws_get_context(wsi)));
+	    self->mutex.lock();
+	    self->mutex.unlock();
 	    int fd = lws_get_socket_fd( wsi );
 	    
 	    bool isFinal = lws_is_final_fragment(wsi);
