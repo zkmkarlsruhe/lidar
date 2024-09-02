@@ -1397,7 +1397,7 @@ public:
   virtual ~TrackableObserver()
   {
     alwaysOn = false;
-    stop( timestamp );
+    stop( timestamp, true );
     stopThread();
 
     if ( userData != NULL )
@@ -2368,7 +2368,7 @@ public:
     return true;
   }
   
-  virtual bool start( uint64_t timestamp=0 )
+  virtual bool start( uint64_t timestamp=0, bool startRects=false )
   {
     if ( isStarted == 1 )
       return false;
@@ -2381,6 +2381,9 @@ public:
 
     isStarted  = 1;
  
+    if ( startRects )
+      rects.start();
+
     if ( !reporting )
       return true;
 
@@ -2412,7 +2415,7 @@ public:
     return true;
   }
   
-  virtual bool stop( uint64_t timestamp=0 )
+  virtual bool stop( uint64_t timestamp=0, bool stopRects=false )
   {
     if ( isStarted == 0 || alwaysOn )
       return false;
@@ -2421,6 +2424,9 @@ public:
     isResuming = false;
 
     isStarted  = 0;
+
+    if ( stopRects )
+      rects.stop();
 
     if ( !reporting )
       return true;
@@ -2539,31 +2545,31 @@ public:
     return true;
   }
 
-  virtual bool start( uint64_t timestamp=0 )
+  virtual bool start( uint64_t timestamp=0, bool startRects=false )
   {
-    if ( !TrackableObserver::start(timestamp) )
+    if ( !TrackableObserver::start(timestamp,startRects) )
       return false;
 
     for ( int i = 0; i < observer.size(); ++i )
-      observer[i]->start( timestamp );
+      observer[i]->start( timestamp, startRects );
 
     return true;
   }
   
-  virtual void startAlwaysObserver( uint64_t timestamp=0 )
+  virtual void startAlwaysObserver( uint64_t timestamp=0, bool startRects=false )
   {
     for ( int i = 0; i < observer.size(); ++i )
       if ( observer[i]->alwaysOn )
-	observer[i]->start( timestamp );
+	observer[i]->start( timestamp, startRects );
   }
 
-  virtual bool stop( uint64_t timestamp=0 )
+  virtual bool stop( uint64_t timestamp=0, bool stopRects=false )
   { 
-    if ( !TrackableObserver::stop(timestamp) )
+    if ( !TrackableObserver::stop(timestamp,stopRects) )
       return false;
     
     for ( int i = 0; i < observer.size(); ++i )
-      observer[i]->stop( timestamp );
+      observer[i]->stop( timestamp, stopRects );
 
     return true;
   }
@@ -2857,12 +2863,12 @@ public:
     return true;
   }
 
-  virtual bool start( uint64_t timestamp=0 )
+  virtual bool start( uint64_t timestamp=0, bool startRects=false )
   {
     if ( timestamp == 0 )
       timestamp = getmsec();
     
-    if ( !TrackableObserver::start(timestamp) )
+    if ( !TrackableObserver::start(timestamp,startRects) )
       return false;
 
     if ( !reporting || !checkFile( timestamp ) )
@@ -2874,9 +2880,9 @@ public:
     return true;
   }
   
-  virtual bool stop( uint64_t timestamp=0 )
+  virtual bool stop( uint64_t timestamp=0, bool stopRects=false )
   { 
-    if ( !TrackableObserver::stop(timestamp) )
+    if ( !TrackableObserver::stop(timestamp,stopRects) )
       return false;
     
     if ( !reporting || !checkFile( timestamp ) )

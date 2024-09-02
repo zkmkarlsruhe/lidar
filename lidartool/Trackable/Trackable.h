@@ -721,7 +721,7 @@ public:
 
 #ifdef TRACKABLE_OBSERVER_H
     if ( observer != NULL )
-      observer->start( timestamp );
+      observer->start( timestamp, true );
 #endif
   }
   
@@ -731,7 +731,7 @@ public:
 
 #ifdef TRACKABLE_OBSERVER_H
     if ( observer != NULL )
-      observer->startAlwaysObserver( timestamp );
+      observer->startAlwaysObserver( timestamp, true );
 #endif
   }
   
