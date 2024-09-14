@@ -39,9 +39,10 @@ public:
     struct Connection
     {
         std::vector<uint8_t>       readBuffer; 
-        list<std::vector<uint8_t>> buffer;     // Ordered list of pending messages to flush out when socket is writable
-        map<string,string> keyValueMap;
-        time_t             createTime;
+        list<std::vector<uint8_t>> writeBuffer;     // Ordered list of pending messages to flush out when socket is writable
+        map<string,string> 	   keyValueMap;
+        time_t             	   createTime;
+        int			   charsSent;
     };
 
     // Manages connections. Unfortunately this is public because static callback for
@@ -52,6 +53,9 @@ public:
     bool		 _binary;
     std::mutex 	 	  mutex;
     
+
+    static inline const int packSize = 4096;
+    unsigned char writeBuffer[packSize + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING];
 
     // Constructor / Destructor
     WebSocketServer( int port, const string certPath = "", const string& keyPath = "", bool binary=false );

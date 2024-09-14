@@ -64,30 +64,48 @@ static int callback_main(   struct lws *wsi,
 	    }
 	    
 	    bool success = true;
-	    
-            while( success && self->connections.count(fd) && !self->connections[fd]->buffer.empty() )
+
+	    if ( self->connections.count(fd) && !self->connections[fd]->writeBuffer.empty() )
             {
-	        std::vector<uint8_t> &message = self->connections[fd]->buffer.front();
-                int msgLen = message.size();
+	      std::vector<uint8_t> &message = self->connections[fd]->writeBuffer.front();
+	      int msgLen = message.size();
+	      const int packSize = self->packSize;
+	
+	      int bufSize = (msgLen > packSize ? packSize : msgLen);
 
-		size_t padded_len = msgLen + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING;
-		unsigned char *buf = (unsigned char*)malloc(padded_len);
+	      unsigned char *buf = &self->writeBuffer[0];
 
-		memset(buf,0,padded_len);
-		memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, &message[0], msgLen);
+	      int size;
+	      int charsSent = self->connections[fd]->charsSent;
 
-		int charsSent = lws_write(wsi,&buf[LWS_SEND_BUFFER_PRE_PADDING],msgLen,self->_binary?LWS_WRITE_BINARY:LWS_WRITE_TEXT);
+	      size = msgLen-charsSent;
+	      if ( size > packSize )
+		size = packSize;
 
-		free( (void*) buf);
+	      memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, &message[charsSent], size);
+	      lws_write_protocol n = (lws_write_protocol) lws_write_ws_flags( self->_binary?LWS_WRITE_BINARY:LWS_WRITE_TEXT, charsSent == 0, charsSent + size == msgLen );
 
-                if( charsSent < msgLen )
-                { self->onErrorWrapper( fd, string( "Error writing to socket" ) );
-		  success = false;
-		  result = -1;
-		}
-		else
-		  self->connections[fd]->buffer.pop_front();
-            }
+	      int sent = lws_write(wsi,&buf[LWS_SEND_BUFFER_PRE_PADDING],size,n);
+
+	      if ( sent > 0 )
+		charsSent += sent;
+	      else if ( sent == 0 )
+		success = false;
+	      else
+   	      { charsSent = 0;
+		success   = false;
+		self->onError( fd, std::string( "Error writing to socket" ) );
+		result = -1;
+	      }
+
+	      if ( charsSent == msgLen )
+              { charsSent = 0;
+		self->connections[fd]->writeBuffer.pop_front();
+	      }
+
+	      self->connections[fd]->charsSent = charsSent;
+	    }
+
 	    if ( success )
 	      lws_callback_on_writable( wsi );
             break;
@@ -204,7 +222,9 @@ void WebSocketServer::onConnectWrapper( int socketID, const char *remoteIP )
 {
     Connection* c = new Connection;
     c->createTime = time( 0 );
+    c->charsSent  = 0;
     c->keyValueMap["remoteIP"] = remoteIP;
+    
     this->connections[ socketID ] = c;
     this->onConnect( socketID );
 }
@@ -225,7 +245,7 @@ void WebSocketServer::onErrorWrapper( int socketID, const string& message )
 void WebSocketServer::send( int socketID, const char *data, int length )
 {
     // Push this onto the buffer. It will be written out when the socket is writable.
-  this->connections[socketID]->buffer.push_back( std::vector<uint8_t>(data, &data[length]) );
+  this->connections[socketID]->writeBuffer.push_back( std::vector<uint8_t>(data, &data[length]) );
 }
 
 void WebSocketServer::broadcast( const char *data, int length )
