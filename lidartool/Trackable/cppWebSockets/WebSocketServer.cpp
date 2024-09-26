@@ -26,7 +26,21 @@ using namespace std;
 // 0 for unlimited
 #define MAX_BUFFER_SIZE 0
 
-// Nasty hack because certain callbacks are statically defined
+static LWS_INLINE int
+write_flags(int initial, int is_start, int is_end)
+{
+  int r;
+
+  if (is_start)
+    r = initial;
+  else
+    r = LWS_WRITE_CONTINUATION;
+
+  if (!is_end)
+    r |= LWS_WRITE_NO_FIN;
+
+  return r;
+}
 
 static int callback_main(   struct lws *wsi,
                             enum lws_callback_reasons reason,
@@ -83,7 +97,7 @@ static int callback_main(   struct lws *wsi,
 		size = packSize;
 
 	      memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, &message[charsSent], size);
-	      lws_write_protocol n = (lws_write_protocol) lws_write_ws_flags( self->_binary?LWS_WRITE_BINARY:LWS_WRITE_TEXT, charsSent == 0, charsSent + size == msgLen );
+	      lws_write_protocol n = (lws_write_protocol) write_flags( self->_binary?LWS_WRITE_BINARY:LWS_WRITE_TEXT, charsSent == 0, charsSent + size == msgLen );
 
 	      int sent = lws_write(wsi,&buf[LWS_SEND_BUFFER_PRE_PADDING],size,n);
 
