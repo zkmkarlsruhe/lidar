@@ -1355,7 +1355,11 @@ TrackableLuaObserver::stall( uint64_t timestamp )
   lua_getglobal( m_Lua, "objectsStall" );
   if ( !lua_isnil( m_Lua, -1 ) )
     for ( int i = rects.numRects()-1; i >= 0; --i )
-      call( "objectsStall", &rects.rect(i).objects, timestamp );
+    { ObsvRect &rect( rects.rect(i) );
+      ObsvObjects &objects( rect.objects );
+      objects.rect = &rect;
+      call( "objectsStall", &objects, timestamp );
+    }
   lua_pop( m_Lua, 1 );
   
   call( "stall", timestamp );
@@ -1380,21 +1384,25 @@ TrackableLuaObserver::resume( uint64_t timestamp )
   lua_getglobal( m_Lua, "objectsResume" );
   if ( !lua_isnil( m_Lua, -1 ) )
     for ( int i = rects.numRects()-1; i >= 0; --i )
-      call( "objectsResume", &rects.rect(i).objects, timestamp );
+    { ObsvRect &rect( rects.rect(i) );
+      ObsvObjects &objects( rect.objects );
+      objects.rect = &rect;
+      call( "objectsResume", &objects, timestamp );
+    }
   lua_pop( m_Lua, 1 );
   
   return true;
 }
 
 bool
-TrackableLuaObserver::start( uint64_t timestamp )
+TrackableLuaObserver::start( uint64_t timestamp, bool startRects )
 {
   if ( timestamp == 0 )
     timestamp = getmsec();
 
   m_Descr.setBool( "isStarted", true );
 
-  if ( !TrackableFileObserver::start( timestamp ) )
+  if ( !TrackableFileObserver::start( timestamp, startRects ) )
     return false;
   
   if ( m_Lua == NULL )
@@ -1403,23 +1411,29 @@ TrackableLuaObserver::start( uint64_t timestamp )
   call( "start", timestamp );
 
   lua_getglobal( m_Lua, "objectsStart" );
+
   if ( !lua_isnil( m_Lua, -1 ) )
     for ( int i = rects.numRects()-1; i >= 0; --i )
-      call( "objectsStart", &rects.rect(i).objects, timestamp );
+    { ObsvRect &rect( rects.rect(i) );
+      ObsvObjects &objects( rect.objects );
+      objects.rect = &rect;
+      call( "objectsStart", &objects, timestamp );
+    }
+
   lua_pop( m_Lua, 1 );
   
   return true;
 }
 
 bool
-TrackableLuaObserver::stop( uint64_t timestamp )
+TrackableLuaObserver::stop( uint64_t timestamp, bool stopRects )
 {
   if ( timestamp == 0 )
     timestamp = getmsec();
     
   m_Descr.setBool( "isStarted", false );
 
-  if ( !TrackableFileObserver::stop( timestamp ) )
+  if ( !TrackableFileObserver::stop( timestamp, stopRects ) )
     return false;
   
   if ( m_Lua == NULL )
@@ -1428,7 +1442,12 @@ TrackableLuaObserver::stop( uint64_t timestamp )
   lua_getglobal( m_Lua, "objectsStop" );
   if ( !lua_isnil( m_Lua, -1 ) )
     for ( int i = rects.numRects()-1; i >= 0; --i )
-      call( "objectsStop", &rects.rect(i).objects, timestamp );
+    { ObsvRect &rect( rects.rect(i) );
+      ObsvObjects &objects( rect.objects );
+      objects.rect = &rect;
+      call( "objectsStop", &objects, timestamp );
+    }
+
   lua_pop( m_Lua, 1 );
   
   call( "stop", timestamp );

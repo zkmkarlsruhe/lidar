@@ -116,8 +116,8 @@ public:
 
   bool stall ( uint64_t timestamp=0 );
   bool resume( uint64_t timestamp=0 );
-  bool start ( uint64_t timestamp=0 );
-  bool stop  ( uint64_t timestamp=0 );
+  bool start ( uint64_t timestamp=0, bool startRects=false );
+  bool stop  ( uint64_t timestamp=0, bool stopRects=false );
  
 };
 
