@@ -593,6 +593,32 @@ do
 	fi
 	shift # past argument
 	;;
+	unused)
+        cmd="$2"
+	shift # past argument
+	shift # past value
+	
+	nodeList=$($0 list | grep -v +)
+
+	readarray -t array <<<"$nodeList"
+
+	for element in "${array[@]}"
+        do
+	  line=($(echo $element | tr ',' "\n"))
+	  ip=${line[2]}
+
+	  if [ "$testMode" == "" ] ; then
+	      if [ "$verbose" != "" ] ; then
+		  ( ./manageNodes.sh $verbose ip $ip $cmd 2>&1 ) &
+	      else
+		  ( ./manageNodes.sh $verbose ip $ip $cmd 2> /dev/null > /dev/null ) &
+	      fi
+	  else
+	      echo ./manageNodes.sh $verbose ip $ip $cmd
+	  fi
+	done
+	exit 0
+	;;
 	register)
         new_entry="$2"
 	

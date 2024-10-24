@@ -492,6 +492,41 @@ fileResponse( std::string path, const char *mimeType, int errorCode=200 )
 }
 
 
+class unused_resource : public http_resource {
+public:
+    render_const std::shared_ptr<http_response> render(const http_request& req) {
+
+      bool run      = false;
+      bool kill     = false;
+      bool start    = false;
+      bool stop     = false;
+      
+      if ( getBoolArg( req, "run",   run ) ||
+	   getBoolArg( req, "kill",  kill ) ||
+	   getBoolArg( req, "start", start ) ||
+	   getBoolArg( req, "stop",  stop ) )
+      {
+	std::string cmd( "./manageNodes.sh unused " );
+	if ( run )
+	  cmd += "run";
+	else if ( start )
+	  cmd += "start";
+	else if ( stop )
+	  cmd += "stop";
+	else 
+	  cmd += "kill";
+	cmd += " &";
+
+	if ( verbose )
+	  printf( "COM: '%s'\n", cmd.c_str() );
+	system( cmd.c_str() );
+      }
+      
+      return stringResponse( "Unused" );
+    }
+};
+
+
 class set_resource : public http_resource {
 public:
     render_const std::shared_ptr<http_response> render(const http_request& req) {
@@ -1704,6 +1739,7 @@ static space_resource        	space_r;
 static nodeList_resource      	nodeList_r;
 static sensorDB_resource      	sensorDB_r;
 static nodes_resource         	nodes_r;
+static unused_resource         	unused_r;
 
 static void
 runWebServer()
@@ -1719,6 +1755,7 @@ runWebServer()
   webserv->register_resource("kill", &server_r);
   webserv->register_resource("rerun", &server_r);
   webserv->register_resource("space", &space_r);
+  webserv->register_resource("unused", &unused_r);
   webserv->register_resource("nodes", &nodes_r);
   webserv->register_resource("nodeList", &nodeList_r);
   webserv->register_resource("sensorDB", &sensorDB_r);
