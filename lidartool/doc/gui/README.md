@@ -71,9 +71,9 @@ The ***Camera / Device*** menu determines the target of interactive transformati
 
 The ***Camera*** can be shifted by moving the mouse with the **left mouse button** pressed.
 
-The selected ***Devices*** can be **shifted** by moving the mouse with the **left mouse button** and the **CTRL key** pressed.
+The selected ***Devices*** can be **shifted** by moving the mouse with the **left mouse button** and the **CTRL key** pressed. For more fine grain control hold additionaly the **SHIFT key** pressed.
 
-Selected ***Devices*** can be also be **rotated** by moving the mouse with the **left mouse button** and the **ALT key pressed**.
+Selected ***Devices*** can be also be **rotated** by moving the mouse with the **left mouse button** and the **ALT key pressed** (**command key** on MacOS). For more fine grain control hold additionaly the **SHIFT key** pressed.
 
 If you want to transform single devices only, toggle them on individually.
 

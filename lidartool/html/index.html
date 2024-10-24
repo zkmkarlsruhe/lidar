@@ -347,13 +347,19 @@ body, image {
       }, updateFreq);
   }
  
-      function getControl( forceCamera )
+      function getControl( forceCamera, event )
       {
         var result = 'control=';
         if ( forceCamera )
           result+='camera';
         else
           result+=control;
+
+        result+="&shift=";
+        if ( event && event.shiftKey )
+          result+="true"
+        else
+          result+="false"
         if ( control == 'device' )
         {
           $("[content^=moveDevice]").each(function(){ 
@@ -1140,6 +1146,11 @@ body, image {
         else if ( keycode == 84 ) // T
           $('#showTracking').click();
       
+// 37 // left
+// 39 / right
+// 38 // top
+// 40 // down
+
 //      console.log( keycode );
 
       }
@@ -1175,17 +1186,17 @@ body, image {
         }
         else
         {
-          cmd = 'dx='+(dx+moveX) + '&dy='+(dy+moveY);
+          cmd = 'dx='+ (dx+moveX) + '&dy='+(dy+moveY);
           moveX=0; moveY=0;
 
           if ( event.altKey )
           { var radius = event.pageX - $(this).prop('width') / 2;
-            var ctrl   = getControl(false);
+            var ctrl   = getControl(false,event);
             $.ajax({ url: 'move?' + cmd + '&'+ ctrl + '&radius='+radius, success: function(data){ isMoving=false; markChangesByControl(false); }}); 
           }
           else
           {
-            var ctrl   = getControl(!event.ctrlKey);
+            var ctrl   = getControl(!event.ctrlKey,event);
             $.ajax({ url: 'move?' + cmd + '&'+ctrl,success: function(data){ isMoving=false; markChangesByControl(!event.ctrlKey); }});
           }
         }
@@ -1194,7 +1205,7 @@ body, image {
       $( "#image" ).on( "mouseup touchend touchcancel", function( event ) {
         isDown = false;
         enableRegions( true );
-        var ctrl   = getControl(!event.ctrlKey);
+        var ctrl   = getControl(!event.ctrlKey,event);
         $.ajax({ url: 'move?isDown=false' + '&'+ ctrl}); 
       });
 

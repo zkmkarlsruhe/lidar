@@ -3518,41 +3518,6 @@ public:
     }
 };
 
-class start_resource : public http_resource {
-public:
-    render_const std::shared_ptr<http_response> render(const http_request& req) {
-
-//  printf( "start_resource\n" );
-
-      log( withRunningMode("START by API").c_str() );
-
-      webMutex.lock();
-      
-      if ( !g_IsStarted )
-      { g_IsStarted = true;
-	TrackGlobal::notification( "start", "message=\"Start by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
-      }
-      
-      LidarDeviceList devices( g_Devices.allDevices() );
-
-      setPlayerSyncTime();
-
-      for ( int d = 0; d < devices.size(); ++d )
-      {
-	devices[d]->open();
-	
-	sendToInVirtual( *devices[d], "/start" );
-      }
-	
-      if ( g_DoTrack )
-	g_Track.start( playerTimeStamp() );
-
-      webMutex.unlock();
-      
-      return stringResponse( "Started Devices" );
-    }
-};
-
 class reopen_resource : public http_resource {
 public:
     render_const std::shared_ptr<http_response> render(const http_request& req) {
@@ -3589,40 +3554,80 @@ public:
     }
 };
 
-class stop_resource : public http_resource {
+class startStop_resource : public http_resource {
 public:
     render_const std::shared_ptr<http_response> render(const http_request& req) {
+      bool start = true;
+      std::string path( &req.get_path()[1] );
 
-//  printf( "stop_resource\n" );
+      if ( path == "start" || path == "startSensors" )
+	start = true;
+      else if ( path == "stop" || path == "stopSensors" )
+	start = false;
+      else
+	start = !g_IsStarted;
 
-      log( "STOP by API" );
-
-      webMutex.lock();
-      
-      if ( g_IsStarted )
-      { g_IsStarted = false;
-	TrackGlobal::notification( "stop", "message=\"Stop by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
-      }
-      
-      LidarDeviceList devices( g_Devices.allDevices() );
-
-      for ( int d = 0; d < devices.size(); ++d )
+      if ( start )
       {
-	sendToInVirtual( *devices[d], "/stop" );
+	log( withRunningMode("START by API").c_str() );
 
-	devices[d]->close();
+	webMutex.lock();
+      
+	if ( !g_IsStarted )
+        { g_IsStarted = true;
+	  TrackGlobal::notification( "start", "message=\"Start by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
+	}
+      
+	LidarDeviceList devices( g_Devices.allDevices() );
+
+	setPlayerSyncTime();
+
+	for ( int d = 0; d < devices.size(); ++d )
+        {
+	  devices[d]->open();
+	
+	  sendToInVirtual( *devices[d], "/start" );
+	}
+	
+	if ( g_DoTrack )
+	  g_Track.start( playerTimeStamp() );
+
+	webMutex.unlock();
+      
+	return stringResponse( "Started Devices" );
       }
-      
-      if ( g_DoTrack )
-	g_Track.stop( playerTimeStamp() );
- 
-      stopFailures();
+      else
+      {
+	log( "STOP by API" );
 
-      webMutex.unlock();
+	webMutex.lock();
       
-      return stringResponse( "Stopped Devices" );
+	if ( g_IsStarted )
+        { g_IsStarted = false;
+	  TrackGlobal::notification( "stop", "message=\"Stop by API\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
+	}
+      
+	LidarDeviceList devices( g_Devices.allDevices() );
+
+	for ( int d = 0; d < devices.size(); ++d )
+        { sendToInVirtual( *devices[d], "/stop" );
+	  devices[d]->close();
+	}
+      
+	if ( g_DoTrack )
+	  g_Track.stop( playerTimeStamp() );
+ 
+	stopFailures();
+
+	webMutex.unlock();
+      
+	return stringResponse( "Stopped Devices" );
+      }
     }
+
 };
+
+
 
 class scanEnv_resource : public http_resource {
 public:
@@ -5360,10 +5365,14 @@ public:
       std::string dys     = req.get_arg("dy");
       std::string radius  = req.get_arg("radius");
       std::string control = req.get_arg("control");
+      std::string shift   = req.get_arg("shift");
       std::string reset   = req.get_arg("reset");
       std::string isDown  = req.get_arg("isDown");
       int dx = (dxs.empty() ? 0 :  std::stoi( dxs ));
       int dy = (dys.empty() ? 0 : -std::stoi( dys ));
+
+      const float shiftDF    = (shift=="true"? 0.175:1.0);
+      const float rotationDF = (shift=="true"? 0.125:1.0);
 
       if ( (dx == 0 && dy == 0) && reset != "true" && isDown != "false" )
 	return std::shared_ptr<http_response>(new string_response("Move"));
@@ -5372,8 +5381,8 @@ public:
       
       LidarPainter &painter( getPainter( req ) );
       
-      float dcx = dx / (float)painter.width  * painter.extent_x;
-      float dcy = dy / (float)painter.height * painter.extent_y;
+      float dcx = dx / (float)painter.width  * painter.extent_x * shiftDF;
+      float dcy = dy / (float)painter.height * painter.extent_y * shiftDF;
       
       if ( isnan(dcx) || isnan(dcy) )
 	return std::shared_ptr<http_response>(new string_response("Move"));
@@ -5454,7 +5463,7 @@ public:
 	      sin = -1.0;
 	    else if ( sin > 1.0 )
 	      sin = 1.0;
-	    float angle = -asin( sin );
+	    float angle = -asin( sin ) * rotationDF;
 	    Matrix3H rotMatrix( rotZMatrix( angle ) );
 
 	    float wx = matrix.w.x;
@@ -5542,7 +5551,7 @@ public:
 		  sin = -1.0;
 		else if ( sin > 1.0 )
 		  sin = 1.0;
-		float angle = -asin( sin );
+		float angle = -asin( sin ) * rotationDF;
 		Matrix3H rotMatrix( rotZMatrix( angle ) );
 		
 		matrix.w.x -= refX;
@@ -5940,9 +5949,10 @@ public:
     }
 };
 
-static start_resource   start_r;
-static reopen_resource reopen_r;
-static stop_resource    stop_r;
+static startStop_resource   start_r;
+static reopen_resource  reopen_r;
+static startStop_resource    stop_r;
+static startStop_resource  toggle_r;
 static run_resource     run_r;
 static reboot_resource  reboot_r;
 static lastErrors_resource lastErrors_r;
@@ -5988,6 +5998,8 @@ runWebServer()
   webserv->register_resource("/restartSensors", &reopen_r);
   webserv->register_resource("/stop",  &stop_r);
   webserv->register_resource("/stopSensors",  &stop_r);
+  webserv->register_resource("/toggle",  &toggle_r);
+  webserv->register_resource("/toggleSensors",  &toggle_r);
   webserv->register_resource("/run",  &run_r);
   webserv->register_resource("/reboot",  &reboot_r);
 
