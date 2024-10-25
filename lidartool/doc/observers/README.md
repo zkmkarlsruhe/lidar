@@ -58,6 +58,7 @@ These parameters are common to all observers:
 | `continuous`         | bool                    | `true`: report values every frame<br>`false`: report value only on value change                                       |
 | `regions`            | comma separated strings | regions the observer is subscribed to                                                                                 |
 | `regionCentered`     | bool                    | `true`: report positions relative to the region center                                                                |
+| `regionNormalized`   | bool                    | `true`: report positions normalized [0..1] to the region bounds                                                       |
 | `reportDistance`     | float                   | if not in `continuous` mode, report *move* only if position change is larger than `reportDistance`                    |
 | `maxFPS`             | float                   | maximum frame rate in which reports happen                                                                            |
 | `smoothing`          | float                   | smoothing weight for positional and size values [0..1]; with larger being smoother, (default=0)                       |
@@ -68,7 +69,7 @@ These parameters are common to all observers:
 | `runMode`            | string                  | set by `StartServer.sh` with the current run mode                                                                     |
 | `alwaysOn`           | bool                    | `true`: observer will never be stopped                                                                                |
 | `operationalDevices` | string                  | comma separated list of device names necessary for this observer to function correctly                                |
-| `scheme`             | string                  | scheme definition                                                                                                      |
+| `scheme`             | string                  | scheme definition                                                                                                     |
 | `schemeFile`         | string                  | file with the scheme definition                                                                                       |
 
 #### Regions

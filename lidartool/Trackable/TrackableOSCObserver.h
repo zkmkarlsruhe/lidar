@@ -286,21 +286,21 @@ public:
     {
       msgEmpty = false;
       addName( msg, obsvFilter.kmc(Filter::ObsvPosition) ); 
-      msg.add( object.x - objects.centerX );
-      msg.add( object.y - objects.centerY );
+      msg.add( (object.x - objects.centerX) * objects.scaleX );
+      msg.add( (object.y - objects.centerY) * objects.scaleY );
       if ( !std::isnan(object.z)  )
-	msg.add( object.z - objects.centerZ );
+	msg.add( (object.z - objects.centerZ) * objects.scaleZ );
     }
     else
     {
       if ( obsvFilter.filterEnabled( Filter::OBSV_X ) )
-	add( msg, obsvFilter.kmc(Filter::ObsvX), object.x - objects.centerX  );
+	add( msg, obsvFilter.kmc(Filter::ObsvX), (object.x - objects.centerX) * objects.scaleX  );
 
       if ( obsvFilter.filterEnabled( Filter::OBSV_Y ) )
-	add( msg, obsvFilter.kmc(Filter::ObsvY), object.y - objects.centerY  );
+	add( msg, obsvFilter.kmc(Filter::ObsvY), (object.y - objects.centerY) * objects.scaleY  );
 
       if ( obsvFilter.filterEnabled( Filter::OBSV_Z ) && !std::isnan(object.z)  )
-	add( msg, obsvFilter.kmc(Filter::ObsvZ), object.z - objects.centerZ  );
+	add( msg, obsvFilter.kmc(Filter::ObsvZ), (object.z - objects.centerZ) * objects.scaleZ  );
     }
     
     if ( obsvFilter.filterEnabled( Filter::OBSV_SIZE ) )

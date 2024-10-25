@@ -199,9 +199,9 @@ public:
     message += " ";
 
     bool first = true;
-    addValue( Filter::OBSV_X,    Filter::ObsvX,    std::to_string(object.x-objects.centerX),    object, message, first );
-    addValue( Filter::OBSV_Y,    Filter::ObsvY,    std::to_string(object.y-objects.centerY),    object, message, first );
-    addValue( Filter::OBSV_Z,    Filter::ObsvZ,    std::to_string(object.z-objects.centerZ),    object, message, first );
+    addValue( Filter::OBSV_X,    Filter::ObsvX,    std::to_string((object.x-objects.centerX)*objects.scaleX),    object, message, first );
+    addValue( Filter::OBSV_Y,    Filter::ObsvY,    std::to_string((object.y-objects.centerY)*objects.scaleY),    object, message, first );
+	      addValue( Filter::OBSV_Z,    Filter::ObsvZ,    std::to_string((object.z-objects.centerZ)*objects.scaleZ),    object, message, first );
     addValue( Filter::OBSV_SIZE, Filter::ObsvSize, std::to_string(object.size), object, message, first );
 
     message += " ";

@@ -242,7 +242,7 @@ int
 ObsvObject_x( lua_State *lua )
 {
   getInstance( object, lua, ObsvObject );
-  lua_pushnumber( lua, object->x - object->objects->centerX );
+  lua_pushnumber( lua, (object->x - object->objects->centerX)*object->objects->scaleX );
   return 1;
 }
 
@@ -250,7 +250,7 @@ int
 ObsvObject_y( lua_State *lua )
 {
   getInstance( object, lua, ObsvObject );
-  lua_pushnumber( lua, object->y - object->objects->centerY );
+  lua_pushnumber( lua, (object->y - object->objects->centerY)*object->objects->scaleY );
   return 1;
 }
 
@@ -258,7 +258,7 @@ int
 ObsvObject_z( lua_State *lua )
 {
   getInstance( object, lua, ObsvObject );
-  lua_pushnumber( lua, object->z - object->objects->centerZ );
+  lua_pushnumber( lua, (object->z - object->objects->centerZ)*object->objects->scaleZ );
   return 1;
 }
 
@@ -515,9 +515,6 @@ LuaFunc_Reg ObsvObjectsFunctions[] =
 {
   { "size", (Lua_CFunction)ObsvObjects_size },
   { "alive", (Lua_CFunction)ObsvObjects_alive },
-  { "centerX", (Lua_CFunction)ObsvObjects_centerX },
-  { "centerY", (Lua_CFunction)ObsvObjects_centerY },
-  { "centerZ", (Lua_CFunction)ObsvObjects_centerZ },
   { "count", (Lua_CFunction)ObsvObjects_count },
   { "switch", (Lua_CFunction)ObsvObjects_switch },
   { "switchduration", (Lua_CFunction)ObsvObjects_switchduration },

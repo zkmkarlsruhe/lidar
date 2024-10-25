@@ -486,6 +486,7 @@ public:
   uint64_t 	lifespanSum;
   uint64_t 	switchDurationSum;
   float         centerX, centerY, centerZ;
+  float         scaleX,  scaleY,  scaleZ;
   float		operational;
   int		alive;
   UUID		uuid;
@@ -514,6 +515,9 @@ public:
     centerX          (  0 ),
     centerY          (  0 ),
     centerZ          (  0 ),
+    scaleX           (  1 ),
+    scaleY           (  1 ),
+    scaleZ           (  1 ),
     operational	     (  1 ),
     alive	     (  1 ),
     custom           (  NULL ),
@@ -1012,19 +1016,19 @@ public:
     addObsvValueGet( Filter::ObsvX, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
     { hasUpdate |= isMoving(*object);
       hasDynamic = true;
-      return ObsvValue( object->x - objects->centerX );
+      return ObsvValue( (object->x - objects->centerX) *  objects->scaleX );
     } );
 
     addObsvValueGet( Filter::ObsvY, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
     { hasUpdate |= isMoving(*object);
       hasDynamic = true;
-      return ObsvValue( object->y - objects->centerY );
+      return ObsvValue( (object->y - objects->centerY) *  objects->scaleY );
     } );
 
     addObsvValueGet( Filter::ObsvZ, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
     { hasUpdate |= isMoving(*object);
       hasDynamic = true;
-      return ObsvValue( object->z - objects->centerZ );
+      return ObsvValue( (object->z - objects->centerZ) *  objects->scaleZ );
     } );
 
     addObsvValueGet( Filter::Size, [this](const char *alias, bool &hasUpdate,bool&hasStatic,bool&hasDynamic,uint64_t timestamp,ObsvObjects *objects, ObsvObject *object)
@@ -1349,6 +1353,7 @@ public:
   bool		    				 dropPrivate;
   bool		    				 showCountStatus;
   bool		    				 rectCentered;
+  bool		    				 rectNormalized;
   bool		    				 showSwitchStatus;
   ObsvRects					 rects;
   Filter::ObsvFilter	   			 obsvFilter;
@@ -1387,6 +1392,7 @@ public:
     showSwitchStatus( false ),
     showCountStatus( false ),
     rectCentered  ( false ),
+    rectNormalized( false ),
     reportDistance( 0.5 ),
     messages	  (),
     runMode	  (),
@@ -1599,6 +1605,7 @@ public:
     descr.get( "test",     	   test );
     descr.get( "useLatent",        useLatent  );
     descr.get( "regionCentered",   rectCentered );
+    descr.get( "regionNormalized", rectNormalized );
     descr.get( "reporting",        reporting  );
     descr.get( "streamData",       reporting  );
     descr.get( "continuous",       continuous );
@@ -1683,9 +1690,19 @@ public:
       ObsvObjects &objects( rect.objects );
 
       objects.rect = &rect;
-      if ( rectCentered )
-      { objects.centerX = rect.x + rect.width  / 2;
-	objects.centerY = rect.y + rect.height / 2;
+      if ( rectCentered || rectNormalized )
+      {
+	if ( rectNormalized )
+	{ objects.centerX = rect.x;
+	  objects.centerY = rect.y;
+	  objects.scaleX  = 1.0 / rect.width;
+	  objects.scaleY  = 1.0 / rect.height;
+	}
+	else
+        {
+	  objects.centerX = rect.x + rect.width  / 2;
+	  objects.centerY = rect.y + rect.height / 2;
+	}
       }
 
       objects.timestamp       = other.timestamp;
@@ -2180,11 +2197,11 @@ public:
       setJsonString( msg, obsvFilter.kmc(Filter::ObsvUUID), object.uuid.str() );
 
     if ( obsvFilter.filterEnabled( Filter::OBSV_X ) )
-      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvX), object.x-objects.centerX );
+      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvX), (object.x-objects.centerX) * objects.scaleX );
     if ( obsvFilter.filterEnabled( Filter::OBSV_Y ) )
-      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvY), object.y-objects.centerY );
+      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvY), (object.y-objects.centerY) * objects.scaleY );
     if ( obsvFilter.filterEnabled( Filter::OBSV_Z ) && !isnan(object.z) )
-      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvZ), object.z-objects.centerZ );
+      setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvZ), (object.z-objects.centerZ) * objects.scaleZ );
 
     if ( obsvFilter.filterEnabled( Filter::OBSV_SIZE ) && !isnan(object.size) )
       setJsonFloat( msg, obsvFilter.kmc(Filter::ObsvSize), object.size );
