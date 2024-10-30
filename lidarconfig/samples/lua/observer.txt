@@ -1,0 +1,15 @@
+# Lua Observer
+
+verb=1
+if [ "$runMode" == "production" ] ; then
+   verb=0
+fi
+
+host=127.0.0.1
+udpPort=9090
+oscPort=9091
+
+observer+=(+observer @type=lua @name=udp @maxFPS=60 @region=myRegion @host=$host @port=$udpPort @verbose=$verb @regionCentered=true @smoothing=0.75 @script=\[conf\]/udp.lua)
+
+observer+=(+observer @type=lua @name=osc @maxFPS=60 @region=myRegion @host=$host @port=$oscPort @verbose=$verb @regionNormalized=false @smoothing=0.75 @script=\[conf\]/osc.lua)
+
