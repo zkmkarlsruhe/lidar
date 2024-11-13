@@ -795,6 +795,44 @@ TrackableLuaObserver_fileName( lua_State *lua )
 }
 
 int
+TrackableLuaObserver_setNormalized( lua_State *lua )
+{
+  TrackableLuaObserver *observer = get_TrackableLuaObserver( lua, lua_upvalueindex(1) );
+
+  bool value = true;
+  int valueType = lua_type( lua, 1 );
+  if ( valueType == LUA_TSTRING )
+    value = getBool(  luaL_checkstring( lua, 1 ) );
+  else if ( valueType == LUA_TNUMBER )
+    value = lua_tonumber( lua, 1 );
+  else
+    value = lua_toboolean( lua, 1 );
+
+  observer->rectNormalized = value;
+
+  return 0;
+}
+
+int
+TrackableLuaObserver_setCentered( lua_State *lua )
+{
+  TrackableLuaObserver *observer = get_TrackableLuaObserver( lua, lua_upvalueindex(1) );
+
+  bool value = true;
+  int valueType = lua_type( lua, 1 );
+  if ( valueType == LUA_TSTRING )
+    value = getBool(  luaL_checkstring( lua, 1 ) );
+  else if ( valueType == LUA_TNUMBER )
+    value = lua_tonumber( lua, 1 );
+  else
+    value = lua_toboolean( lua, 1 );
+
+  observer->rectCentered = value;
+
+  return 0;
+}
+
+int
 TrackableLuaObserver_setFileName( lua_State *lua )
 {
   TrackableLuaObserver *observer = get_TrackableLuaObserver( lua, lua_upvalueindex(1) );
@@ -1056,6 +1094,12 @@ TrackableLuaObserver::openLua()
 
   registerInstance( m_Lua, &this->regions, TrackableLuaRegions );
   lua_setfield ( m_Lua, -2, "regions" );
+  
+  registerMethod( TrackableLuaObserver_setNormalized );
+  lua_setfield ( m_Lua, -2, "setNormalized" );
+  
+  registerMethod( TrackableLuaObserver_setCentered );
+  lua_setfield ( m_Lua, -2, "setCentered" );
   
   registerMethod( TrackableLuaObserver_fileName );
   lua_setfield ( m_Lua, -2, "logFileName" );
