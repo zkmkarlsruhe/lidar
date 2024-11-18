@@ -1545,13 +1545,13 @@ static void exitHook()
   if ( g_IsStarted && g_DoTrack )
   {
     log( "STOP on Exit Application" );
-    TrackBase::notification( "stop", "message=\"Stop on application exit\" conf=%s  runMode=%sverbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
+    TrackBase::notification( "stop", "message=\"Stop on application exit\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
     g_Track.stop( playerTimeStamp() );
     g_IsStarted = false;
   }
 
   log( "RUN Exit Application" );
-  TrackBase::notification( "run", "message=\"Exit Application\" conf=%s  runMode=%sverbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
+  TrackBase::notification( "run", "message=\"Exit Application\" conf=%s runMode=%s verbose=%s", g_Conf.c_str(), g_RunningMode.c_str(), g_Verbose?"true":"false" );
 
   g_Track.finishObserver();
 }
