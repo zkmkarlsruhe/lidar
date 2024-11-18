@@ -59,7 +59,7 @@ end
 function sendClear( objects )
 
    local message = osc.new_message {
-      address = oscAddress(objects,'clear'),
+      address = header(objects,'clear'),
       types = ''
    }
 
