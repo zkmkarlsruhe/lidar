@@ -886,6 +886,28 @@ TrackableLuaObserver_writeJsonMsg( lua_State *lua )
 
 
 int
+TrackableLuaObserver_descrSet( lua_State *lua )
+{
+  TrackableLuaObserver *observer = get_TrackableLuaObserver( lua, lua_upvalueindex(1) );
+
+  KeyValueMap map;
+  
+  const char *key = luaL_checkstring( lua, 1 );
+  if ( lua_type( lua, 2 ) == LUA_TSTRING )
+  { std::string value = lua_tostring( lua, 2 );
+    map.set( key, value.c_str() );
+  }
+  else if ( lua_type( lua, 2 ) == LUA_TNUMBER )
+    map.setDouble( key, lua_tonumber( lua, 2 ) );
+  else if ( lua_type( lua, 2 ) == LUA_TBOOLEAN )
+    map.setBool( key, lua_toboolean( lua, 2 ) );
+
+  observer->setParam( map );
+
+  return 0;
+}
+
+int
 TrackableLuaObserver_descrGetBool( lua_State *lua )
 {
   TrackableLuaObserver *observer = get_TrackableLuaObserver( lua, lua_upvalueindex(1) );
@@ -1149,6 +1171,9 @@ TrackableLuaObserver::openLua()
 
   registerMethod( TrackableLuaObserver_descrGetString );
   lua_setfield ( m_Lua, -2, "string");
+
+  registerMethod( TrackableLuaObserver_descrSet );
+  lua_setfield ( m_Lua, -2, "set");
 
   lua_setfield ( m_Lua, -2, "param");
   
