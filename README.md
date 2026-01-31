@@ -1,12 +1,27 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo-light.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg">
+    <img alt="ZKM" src="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg" width="120">
+  </picture>
+</p>
+
 # Lidar Toolset
+
+[![ZKM](https://img.shields.io/badge/ZKM-Karlsruhe-blue)](https://zkm.de)
+[![License: BSD-2-Clause](https://img.shields.io/badge/License-BSD--2--Clause-blue.svg)](LICENSE.txt)
 
 The lidar toolset is intended to be used by artists for interactive applications or museums to gather information about visitor flow using laser range detection.
 
-Copyright (c) 2022 ZKM | Karlsruhe.  
+Part of [ZKM Open Source](https://github.com/zkmkarlsruhe)
+
+---
+
+Copyright (c) 2022 ZKM | Karlsruhe.
 Copyright (c) 2022 Bernd Lintermann.
 
 For information on usage and redistribution, and for a DISCLAIMER OF ALL
-WARRANTIES, see the file "LICENSE" in this distribution.
+WARRANTIES, see the file "LICENSE.txt" in this distribution.
 
 BSD Simplified License.
 
