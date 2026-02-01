@@ -1,11 +1,3 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo-light.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg">
-    <img alt="ZKM" src="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg" width="120">
-  </picture>
-</p>
-
 # Lidar Toolset
 
 [![ZKM](https://img.shields.io/badge/ZKM-Karlsruhe-blue)](https://zkm.de)
@@ -149,3 +141,16 @@ As part of the project, digital curating will be critically examined using vario
 
 ![Logo](media/Logo_ZKM_DMN_KSB.png)
 
+---
+
+## Funded by
+
+<p align="center">
+  <a href="https://zkm.de">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo-light.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg">
+      <img alt="ZKM" src="https://raw.githubusercontent.com/zkmkarlsruhe/zkm-open-source/main/assets/zkm-logo.svg" width="120">
+    </picture>
+  </a>
+</p>
